@@ -8,7 +8,6 @@ import DataSource.DataSource;
 import Models.User;
 import java.net.ConnectException;
 import java.util.ArrayList;
-import javax.security.auth.login.AccountNotFoundException;
 import javax.swing.JOptionPane;
 
 /**
@@ -68,9 +67,7 @@ public class UserRepository extends DataSource<User> {
                             result.getString(PRIMARYKEY)).setAccount(
                             accountRepos.get(result.getString(BANKACCOUNT))
                     );
-                } else {
-                    throw new AccountNotFoundException("Cannot find any user with username " + id[0]);
-                }
+                } 
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());

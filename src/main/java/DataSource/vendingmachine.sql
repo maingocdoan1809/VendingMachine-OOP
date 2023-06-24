@@ -2,10 +2,10 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th6 23, 2023 lúc 02:38 AM
--- Phiên bản máy phục vụ: 10.4.27-MariaDB
--- Phiên bản PHP: 8.1.12
+-- Host: 127.0.0.1
+-- Generation Time: Jun 24, 2023 at 01:19 PM
+-- Server version: 10.4.27-MariaDB
+-- PHP Version: 8.1.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `vendingmachine`
+-- Database: `vendingmachine`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `bankaccounts`
+-- Table structure for table `bankaccounts`
 --
 
 CREATE TABLE `bankaccounts` (
@@ -36,16 +36,16 @@ CREATE TABLE `bankaccounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `bankaccounts`
+-- Dumping data for table `bankaccounts`
 --
 
 INSERT INTO `bankaccounts` (`account_number`, `account_name`, `account_password`, `account_balance`, `bank_id`) VALUES
-('280254581809', 'Mai Ngọc Đoàn', '123456789', 1000000, 1);
+('280254581809', 'Mai Ngọc Đoàn', '123456789', 985000, 1);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `banks`
+-- Table structure for table `banks`
 --
 
 CREATE TABLE `banks` (
@@ -54,7 +54,7 @@ CREATE TABLE `banks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `banks`
+-- Dumping data for table `banks`
 --
 
 INSERT INTO `banks` (`id`, `name`) VALUES
@@ -65,7 +65,7 @@ INSERT INTO `banks` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `history`
+-- Table structure for table `history`
 --
 
 CREATE TABLE `history` (
@@ -79,7 +79,7 @@ CREATE TABLE `history` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `products`
+-- Table structure for table `products`
 --
 
 CREATE TABLE `products` (
@@ -91,17 +91,19 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `products`
+-- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `remain`, `image`) VALUES
 (1, 'Coca Cola(320ml)', 10000, 20, NULL),
-(2, 'Pepsi(320ml)', 11000, 20, NULL);
+(2, 'Pepsi(320ml)', 11000, 20, NULL),
+(3, 'Sting (320ml)', 10500, 0, NULL),
+(4, 'Milk Coffee', 15000, 0, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -111,31 +113,31 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`username`, `password`, `bank_account`) VALUES
 ('maingocdoan', '123456', '280254581809');
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `bankaccounts`
+-- Indexes for table `bankaccounts`
 --
 ALTER TABLE `bankaccounts`
   ADD PRIMARY KEY (`account_number`),
   ADD KEY `bank_id` (`bank_id`);
 
 --
--- Chỉ mục cho bảng `banks`
+-- Indexes for table `banks`
 --
 ALTER TABLE `banks`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `history`
+-- Indexes for table `history`
 --
 ALTER TABLE `history`
   ADD PRIMARY KEY (`id`),
@@ -143,54 +145,54 @@ ALTER TABLE `history`
   ADD KEY `product` (`product`);
 
 --
--- Chỉ mục cho bảng `products`
+-- Indexes for table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Chỉ mục cho bảng `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`username`),
   ADD KEY `bank_account` (`bank_account`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `banks`
+-- AUTO_INCREMENT for table `banks`
 --
 ALTER TABLE `banks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT cho bảng `products`
+-- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `bankaccounts`
+-- Constraints for table `bankaccounts`
 --
 ALTER TABLE `bankaccounts`
   ADD CONSTRAINT `bankaccounts_ibfk_1` FOREIGN KEY (`bank_id`) REFERENCES `banks` (`id`);
 
 --
--- Các ràng buộc cho bảng `history`
+-- Constraints for table `history`
 --
 ALTER TABLE `history`
   ADD CONSTRAINT `history_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`username`),
   ADD CONSTRAINT `history_ibfk_2` FOREIGN KEY (`product`) REFERENCES `products` (`id`);
 
 --
--- Các ràng buộc cho bảng `users`
+-- Constraints for table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`bank_account`) REFERENCES `bankaccounts` (`account_number`);

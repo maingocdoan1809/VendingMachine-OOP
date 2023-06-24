@@ -5,19 +5,10 @@
 package DataSource.Repository;
 
 import DataSource.DataSource;
-import static DataSource.Repository.BankAccountRepository.ACCOUNTBALANCE;
-import static DataSource.Repository.BankAccountRepository.ACCOUNTNAME;
-import static DataSource.Repository.BankAccountRepository.BANKNAME;
-import static DataSource.Repository.BankAccountRepository.PRIMARYKEY;
-import static DataSource.Repository.BankAccountRepository.foreignKey;
-import static DataSource.Repository.BankAccountRepository.tableName;
-import static DataSource.Repository.BankAccountRepository.tableNameForeign;
-import static DataSource.Repository.BankAccountRepository.tableNameForeignKey;
 import Models.BankAccount;
 import Models.Product;
 import java.net.ConnectException;
 import java.util.ArrayList;
-import javax.security.auth.login.AccountNotFoundException;
 import javax.swing.JOptionPane;
 
 /**
@@ -70,8 +61,25 @@ public class ProductRepository extends DataSource<Product> {
     }
 
     @Override
-    public boolean update(Product object) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public boolean update(Product object) throws Exception {
+        var connection = DataSource.getConnection();
+        if (connection == null) {
+            throw new ConnectException("Cannot connect to database");
+        }
+        try ( var stm = connection.createStatement()) {
+            connection.setAutoCommit(false);
+
+            stm.execute(
+                    String.format("Update %s set %s = %d where %s = '%s'",
+                            tableName, PRODUCTREMAIN, object.getRemainNums(), PRIMARYKEY, object.getId()));
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            connection.rollback();
+            return false;
+        } finally {
+            connection.close();
+        }
     }
 
 }

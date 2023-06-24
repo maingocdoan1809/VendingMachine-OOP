@@ -17,9 +17,9 @@ import javax.swing.JOptionPane;
  */
 public class BankAccountRepository extends DataSource<BankAccount> {
 
-    public static String tableName = "bankaccounts";    
-    public static String tableNameForeign = "banks";    
-    public static String tableNameForeignKey = "id";   
+    public static String tableName = "bankaccounts";
+    public static String tableNameForeign = "banks";
+    public static String tableNameForeignKey = "id";
     public static String foreignKey = "bank_id";
     public static String PRIMARYKEY = "account_number";
     public static String ACCOUNTNAME = "account_name";
@@ -41,14 +41,14 @@ public class BankAccountRepository extends DataSource<BankAccount> {
             }
             try ( var stm = connection.createStatement()) {
                 var result = stm.executeQuery(
-                        String.format("Select * from %s inner join %s on %s = %s where %s = %s", 
+                        String.format("Select * from %s inner join %s on %s = %s where %s = %s",
                                 tableName, tableNameForeign, foreignKey, tableNameForeignKey, PRIMARYKEY, credential[0]));
                 if (result.next()) {
                     return new BankAccount(
                             result.getString(PRIMARYKEY)
                     ).setBankAccountUsername(result.getString(ACCOUNTNAME))
-                     .setBankName(result.getString(BANKNAME))
-                     .setBankBalance(result.getFloat(ACCOUNTBALANCE));
+                            .setBankName(result.getString(BANKNAME))
+                            .setBankBalance(result.getFloat(ACCOUNTBALANCE));
 
                 } else {
                     throw new AccountNotFoundException("Cannot find any bank");
@@ -66,8 +66,25 @@ public class BankAccountRepository extends DataSource<BankAccount> {
     }
 
     @Override
-    public boolean update(BankAccount object) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public boolean update(BankAccount object) throws Exception {
+        var connection = DataSource.getConnection();
+        if (connection == null) {
+            throw new ConnectException("Cannot connect to database");
+        }
+        try ( var stm = connection.createStatement()) {
+            connection.setAutoCommit(false);
+
+            stm.execute(
+                    String.format("Update %s set %s = %f where %s = '%s'",
+                            tableName, ACCOUNTBALANCE, object.getBankBalance(), PRIMARYKEY, object.getBankAccountNumber()));
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            connection.rollback();
+            return false;
+        } finally {
+            connection.close();
+        }
     }
 
 }

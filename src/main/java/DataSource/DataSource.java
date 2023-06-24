@@ -4,7 +4,6 @@
  */
 package DataSource;
 
-import java.awt.List;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public abstract class DataSource<T> {
     abstract public ArrayList<T> all();
     abstract public T get(Object ...id);
     abstract public boolean insert(T object);    
-    abstract public boolean update(T object);
+    abstract public boolean update(T object) throws Exception;
 
     
 }
