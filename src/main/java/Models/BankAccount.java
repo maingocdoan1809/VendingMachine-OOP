@@ -13,10 +13,13 @@ public class BankAccount {
     private String bankName;
     private String bankAccountNumber;    
     private float bankBalance;
-
+    
+    
     public BankAccount(String bankAccountNumber) {
         this.bankAccountNumber = bankAccountNumber;
     }
+    
+    
     public float getBankBalance() {
         return bankBalance;
     }
@@ -34,7 +37,7 @@ public class BankAccount {
         this.bankAccountUsername = bankAccountUsername;
         return this;
     }
-
+    
     public String getBankName() {
         return bankName;
     }

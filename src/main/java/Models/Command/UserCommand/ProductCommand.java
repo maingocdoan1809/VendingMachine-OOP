@@ -11,11 +11,11 @@ import Models.Product;
  *
  * @author Admin
  */
-public abstract class UserCommand implements Command{
-    protected int productId;
+public abstract class ProductCommand implements Command{
+    protected Product product;
 
-    public UserCommand(int productId) {
-        this.productId = productId;
+    public ProductCommand(Product product) {
+        this.product = product;
     }
     
 }

@@ -8,6 +8,7 @@ import DataSource.Repository.UserRepository;
 import Models.Observer.Observer;
 import Models.Observer.Subject;
 import Models.User;
+import Utils.Utility;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -55,21 +56,16 @@ public class Recharge extends javax.swing.JFrame implements Subject {
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Make a payment");
 
-        Username.setForeground(new java.awt.Color(0, 0, 0));
         Username.setText("Username");
 
-        Username1.setForeground(new java.awt.Color(0, 0, 0));
         Username1.setText("Password");
 
         txtMoney.setBackground(new java.awt.Color(204, 204, 204));
-        txtMoney.setForeground(new java.awt.Color(0, 0, 0));
 
         txtPassword.setBackground(new java.awt.Color(204, 204, 204));
-        txtPassword.setForeground(new java.awt.Color(0, 0, 0));
 
         btnLogin.setBackground(new java.awt.Color(204, 204, 255));
         btnLogin.setForeground(new java.awt.Color(0, 0, 51));
@@ -81,14 +77,16 @@ public class Recharge extends javax.swing.JFrame implements Subject {
         });
 
         jButton1.setBackground(new java.awt.Color(204, 204, 255));
-        jButton1.setForeground(new java.awt.Color(0, 0, 0));
         jButton1.setText("Register");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        Username2.setForeground(new java.awt.Color(0, 0, 0));
         Username2.setText("How much do you want to spend for this time?");
 
         txtUsername.setBackground(new java.awt.Color(204, 204, 204));
-        txtUsername.setForeground(new java.awt.Color(0, 0, 0));
 
         txtNoti.setForeground(new java.awt.Color(255, 51, 51));
         txtNoti.setText("How much do you want to spend for this time");
@@ -98,40 +96,39 @@ public class Recharge extends javax.swing.JFrame implements Subject {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 241, Short.MAX_VALUE)
+                        .addGap(71, 71, 71)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 151, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtNoti)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtMoney)
+                                .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(Username2)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(txtNoti)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(txtMoney)
-                                            .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(Username2)
-                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(Username)
-                                                .addComponent(Username1))
-                                            .addGap(18, 18, 18)
-                                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                                                .addComponent(txtUsername)))))))))
-                .addContainerGap(177, Short.MAX_VALUE))
+                                    .addComponent(Username)
+                                    .addComponent(Username1))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtPassword)
+                                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addContainerGap(153, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(109, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(16, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addGap(48, 48, 48)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -149,9 +146,7 @@ public class Recharge extends javax.swing.JFrame implements Subject {
                 .addComponent(txtNoti)
                 .addGap(8, 8, 8)
                 .addComponent(btnLogin)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addContainerGap(95, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel1);
@@ -162,7 +157,6 @@ public class Recharge extends javax.swing.JFrame implements Subject {
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
 
-
         try {
             String username = this.txtUsername.getText();
             String password = new String(this.txtPassword.getPassword());
@@ -171,14 +165,28 @@ public class Recharge extends javax.swing.JFrame implements Subject {
                 throw new InvalidParameterException("You have to fill in all fields.");
             }
             user = new UserRepository().get(username, password);
-            if (user != null) {
-                this.notifyObservers();
-                this.dispose();
+            if (user == null) {
+                throw new Exception("Your username or password is not correct.");
             }
+            float moneyFloat = Float.parseFloat(getPreferPay());
+            if (moneyFloat > user.getAccount().getBankBalance()) {
+                throw new RuntimeException(
+                        "Your bank balance is not sufficent for this request <Your balance: "
+                        + Utility.toMoney(user.getAccount().getBankBalance()) + ">");
+            }
+            this.user.setCurrentMoney(moneyFloat);
+            this.notifyObservers();
+            this.dispose();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "You need to input a valid number");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        new Register().setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
     public String getPreferPay() {
         return this.txtMoney.getText();
     }

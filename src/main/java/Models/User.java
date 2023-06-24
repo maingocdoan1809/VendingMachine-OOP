@@ -4,21 +4,39 @@
  */
 package Models;
 
+import Models.Observer.Observer;
+import Models.Observer.Subject;
+
 /**
  *
  * @author Admin
  */
-public class User {
+public class User implements Subject {
+
     private String username = "";
     private String password = "";
+    private float currentMoney = (float)0.0;
     private BankAccount account = null;
-    
+    private Observer observer = null;
+
     public User(String username) {
         this.username = username;
     }
 
     public String getPassword() {
         return password;
+    }
+    
+    public float getCurrentMoney() {
+        return this.currentMoney;
+    }
+    public float setCurrentMoney( float amount ) {
+        if (amount < 0) {
+            currentMoney = 0;
+        } else {
+            this.currentMoney = amount;
+        }
+        return amount;
     }
 
     public User setPassword(String password) {
@@ -29,6 +47,7 @@ public class User {
     public String getUsername() {
         return username;
     }
+
     public BankAccount getAccount() {
         return account;
     }
@@ -37,7 +56,23 @@ public class User {
         this.account = account;
         return this;
     }
-    
-    
-    
+
+    @Override
+    public void register(Observer observer) {
+        this.observer = observer;
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        this.observer = null;
+    }
+
+    @Override
+    public void notifyObservers() {
+        if (this.observer != null) {
+            this.observer.update(this);
+
+        }
+    }
+
 }

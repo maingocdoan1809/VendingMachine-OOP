@@ -5,21 +5,18 @@
 package Views;
 
 import DataSource.Repository.ProductRepository;
+import Models.Command.SystemCommand.DecorateButtonCommand;
+import Models.Command.SystemCommand.RechargeCommand;
+import Models.Command.UserCommand.BuyGoodsCommand;
 import Models.Observer.Observer;
 import Models.Observer.Subject;
 import Models.Product;
 import Models.User;
 import Utils.Utility;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
@@ -72,42 +69,72 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         for (Map.Entry<String, JButton> entry : buttons.entrySet()) {
             Product p = pRespo.get(entry.getKey());
-            if (p != null) {
+            populateButtonWithProduct(entry.getValue(), p);
+        }
 
-                entry.getValue().setText(p.getName());
+        showUserInfo(false);
+    }
 
-            } else {
-                entry.getValue().setText("Empty");
-                entry.getValue().setBackground(new Color(255, 33, 113));
+    final private void populateButtonWithProduct(JButton button, Product p) {
+        if (p != null) {
+            button.setText(p.getName());
+
+            if (p.getRemainNums() == 0) {
+                new DecorateButtonCommand(
+                        button,
+                        DecorateButtonCommand.ButtonState.SOLDOUT)
+                        .execute();
+                selectedButton = null;
             }
+            p.register(this);
+        } else {
+            new DecorateButtonCommand(
+                    button,
+                    DecorateButtonCommand.ButtonState.EMPTY)
+                    .execute();
 
-            ((JButton) entry.getValue()).addMouseListener(new MouseAdapter() {
+        }
+        if (button.getMouseListeners().length == 1) {
+            button.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
-
-                    if (p != null) {
+                    if (p != null && p.getRemainNums() > 0) {
                         if (selectedButton != null) {
-                            selectedButton.setBackground(new Color(204, 204, 255));
+                            new DecorateButtonCommand(
+                                selectedButton,
+                                 DecorateButtonCommand.ButtonState.READY)
+                                .execute();
                         }
-                        selectedButton = entry.getValue();
-                        selectedButton.setBackground(new Color(122, 168, 116));
+                        selectedButton = button;
+
+                        new DecorateButtonCommand(
+                                selectedButton,
+                                DecorateButtonCommand.ButtonState.SELECTED)
+                                .execute();
 
                         txtPName.setText(p.getName());
                         txtPNum.setText(p.getRemainNums() + "");
                         txtPPrice.setText(p.getPriceFormat());
-                        if (evt.getClickCount() == 1) {
-
-                        } else if (evt.getClickCount() == 2) {
-                            JOptionPane.showMessageDialog(null, p.getName());
+                        if (evt.getClickCount() == 2) {
+                            handleUserBuyingProductEvent(p);
                         }
                     } else {
-                        JOptionPane.showMessageDialog(entry.getValue(), "Not available");
+                        JOptionPane.showMessageDialog(button, "Not available");
                     }
 
                 }
             });
+
+        }
+    }
+
+    private void handleUserBuyingProductEvent(Product product) {
+
+        if (this.user == null) {
+            new RechargeCommand(this).execute();
+        } else {
+            new BuyGoodsCommand(this.user, product).execute();
         }
 
-        this.btnDone.setVisible(false);
     }
 
     /**
@@ -121,11 +148,12 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         jPanel1 = new javax.swing.JPanel();
         btnRecharge = new javax.swing.JButton();
-        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
-        javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
+        jLabelAname = new javax.swing.JLabel();
+        jLabelABalance = new javax.swing.JLabel();
         txtUName = new javax.swing.JLabel();
         txtAvalibility = new javax.swing.JLabel();
         btnDone = new javax.swing.JButton();
+        btnAddMore = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
@@ -170,7 +198,6 @@ public class Screen extends javax.swing.JPanel implements Observer {
         jPanel1.setPreferredSize(new java.awt.Dimension(200, 349));
 
         btnRecharge.setBackground(new java.awt.Color(153, 153, 255));
-        btnRecharge.setForeground(new java.awt.Color(0, 0, 0));
         btnRecharge.setText("Nạp tiền");
         btnRecharge.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -178,11 +205,9 @@ public class Screen extends javax.swing.JPanel implements Observer {
             }
         });
 
-        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel2.setText("Tài khoản");
+        jLabelAname.setText("Tài khoản");
 
-        jLabel7.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel7.setText("Số dư còn lại");
+        jLabelABalance.setText("Số dư còn lại");
 
         txtUName.setBackground(new java.awt.Color(51, 255, 51));
         txtUName.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -193,11 +218,19 @@ public class Screen extends javax.swing.JPanel implements Observer {
         txtAvalibility.setForeground(new java.awt.Color(0, 51, 255));
 
         btnDone.setBackground(new java.awt.Color(153, 153, 255));
-        btnDone.setForeground(new java.awt.Color(0, 0, 0));
         btnDone.setText("Rút tiền và hoàn tất");
         btnDone.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDoneActionPerformed(evt);
+            }
+        });
+
+        btnAddMore.setBackground(new java.awt.Color(0, 153, 255));
+        btnAddMore.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddMore.setText("Nạp thêm");
+        btnAddMore.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddMoreActionPerformed(evt);
             }
         });
 
@@ -216,32 +249,37 @@ public class Screen extends javax.swing.JPanel implements Observer {
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtUName, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(jLabelABalance, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabelAname, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(btnRecharge, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnRecharge, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(btnDone, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnDone, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnAddMore, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(182, 182, 182)
-                .addComponent(jLabel2)
+                .addComponent(jLabelAname)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtUName)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel7)
+                .addComponent(jLabelABalance)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtAvalibility)
-                .addGap(27, 27, 27)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnAddMore)
+                .addGap(7, 7, 7)
                 .addComponent(btnDone)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 191, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 194, Short.MAX_VALUE)
                 .addComponent(btnRecharge)
                 .addContainerGap())
         );
@@ -267,7 +305,6 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         jLabel6.setBackground(new java.awt.Color(255, 255, 255));
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel6.setIcon(new javax.swing.ImageIcon("D:\\MAINGOCDOAN\\JAVA\\VendingMachine\\images\\rsz_1cocacola.png")); // NOI18N
 
         jLabel4.setForeground(new java.awt.Color(102, 102, 102));
         jLabel4.setText("Số lượng còn lại");
@@ -429,7 +466,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
         jLabel5.setBackground(new java.awt.Color(0, 0, 0));
         jLabel5.setFont(new java.awt.Font("Agent Orange", 0, 36)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(51, 0, 102));
-        jLabel5.setText("Have a good day!");
+        jLabel5.setText("Live every drop");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -472,17 +509,39 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
     }//GEN-LAST:event_btnRechargeActionPerformed
 
+    private void showUserInfo(boolean state) {
+
+        this.txtAvalibility.setVisible(state);
+        this.txtUName.setVisible(state);
+        this.jLabelABalance.setVisible(state);
+        this.jLabelAname.setVisible(state);
+        this.btnDone.setVisible(state);
+        this.btnAddMore.setVisible(state);
+    }
+
     private void btnDoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDoneActionPerformed
 
         this.user = null;
-        this.txtAvalibility.setText("");
-        this.txtUName.setText("");
-        this.btnDone.setVisible(false);
-
+        showUserInfo(false);
+        
     }//GEN-LAST:event_btnDoneActionPerformed
+
+    private void btnAddMoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMoreActionPerformed
+        String input = JOptionPane.showInputDialog("Nhập số tiền bạn muốn nạp thêm", 0);
+        
+        float userInputMoney = (float) 0.0;
+        try {
+            userInputMoney = Float.parseFloat(input);
+            this.user.setCurrentMoney(this.user.getCurrentMoney() + userInputMoney);
+            this.user.notifyObservers();
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Bạn phải nhập một số, vui lòng thử lại");
+        }
+    }//GEN-LAST:event_btnAddMoreActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddMore;
     private javax.swing.JButton btnDone;
     private javax.swing.JButton btnRecharge;
     private javax.swing.JButton btnSlot1;
@@ -512,6 +571,8 @@ public class Screen extends javax.swing.JPanel implements Observer {
     private javax.swing.JButton btnSlot9;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabelABalance;
+    private javax.swing.JLabel jLabelAname;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -523,35 +584,36 @@ public class Screen extends javax.swing.JPanel implements Observer {
     private javax.swing.JLabel txtUName;
     // End of variables declaration//GEN-END:variables
 
+    public User getUser() {
+        return this.user;
+    }
+
     @Override
     public void update(Subject subject) {
 
         if (subject instanceof Recharge) {
-
             Recharge l = (Recharge) subject;
             User user = l.getLoggedInUser();
             this.user = user;
-            try {
-                float money = Float.parseFloat(l.getPreferPay());
-                if (money > user.getAccount().getBankBalance()) {
+            this.user.register(this);
+            this.txtUName.setText(user.getUsername());
+            this.txtAvalibility.setText(Utility.toMoney(user.getCurrentMoney()));
+            showUserInfo(true);
+        } else if (subject == this.user) {
+            this.user.register(this);
+            this.txtUName.setText(user.getUsername());
+            this.txtAvalibility.setText(Utility.toMoney(this.user.getCurrentMoney()));
+            showUserInfo(true);
+        } else if (subject instanceof Product) {
 
-                    throw new RuntimeException(
-                            "Your bank balance is not sufficent for this request <Your balance: "
-                            + Utility.toMoney(user.getAccount().getBankBalance()) + ">");
-                }
-                this.txtUName.setText(user.getUsername());
-                this.txtAvalibility.setText(Utility.toMoney(money));
-                this.btnDone.setVisible(true);
+            Product p = (Product) subject;
+            this.txtPNum.setText(p.getRemainNums() + "");
+            this.txtPPrice.setText( Utility.toMoney(p.getPrice()) );
+            this.txtPName.setText(p.getName());
 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "You need to input a valid number");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e.getMessage());
-            }
+            JButton btnWithP = this.buttons.get(p.getId() + "");
+            populateButtonWithProduct(btnWithP, p);
 
-        } else {
-
-            System.out.println("False");
         }
 
     }

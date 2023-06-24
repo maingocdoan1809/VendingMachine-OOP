@@ -4,14 +4,26 @@
  */
 package Models.Command.SystemCommand;
 
+import Models.Observer.Observer;
+import Views.Recharge;
+
 /**
  *
  * @author Admin
  */
-public class LoginCommand extends SystemCommand{
+public class RechargeCommand extends SystemCommand{
+    
+    private Observer caller;
+
+    public RechargeCommand(Observer caller) {
+        this.caller = caller;
+    }
 
     @Override
     public void execute() {
+        Recharge l = new Recharge();
+        l.register(caller);
+        l.setVisible(true);
     }
     
 }

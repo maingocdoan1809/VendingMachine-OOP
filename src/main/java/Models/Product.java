@@ -4,25 +4,27 @@
  */
 package Models;
 
-import java.text.NumberFormat;
-import java.util.Currency;
-import java.util.Locale;
+import Models.Observer.Observer;
+import Models.Observer.Subject;
 
 /**
  *
  * @author Admin
  */
-public class Product {
+public class Product implements Subject{
     private int id ;
     private String name;
     private float price;
     private String priceStr;
     private String imgPath;
     private int remainNums;
+    private Observer observer;
     public Product(int id ) {
         this.id = id;
     }
-
+    public int getId() {
+        return this.id;
+    }
     public String getImgPath() {
         return imgPath;
     }
@@ -33,10 +35,8 @@ public class Product {
     }
     
     public String getPriceFormat() {
-        Locale vn = new Locale("vn", "VN");
-        Currency vndong = Currency.getInstance(vn);
-        NumberFormat vndongFormat = NumberFormat.getCurrencyInstance(vn);
-        return vndongFormat.format(this.price).substring(2);
+        
+        return this.priceStr;
     }
 
     public int getRemainNums() {
@@ -68,5 +68,22 @@ public class Product {
     public Product setPriceStr(String priceStr) {
         this.priceStr = priceStr;
         return this;
+    }
+
+    @Override
+    public void register(Observer observer) {
+        this.observer = observer;
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        this.observer = null;
+    }
+
+    @Override
+    public void notifyObservers() {
+        if (this.observer != null) {
+            this.observer.update(this);
+        }
     }
 }
