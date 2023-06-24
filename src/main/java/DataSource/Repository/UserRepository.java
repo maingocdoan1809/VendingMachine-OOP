@@ -52,22 +52,32 @@ public class UserRepository extends DataSource<User> {
     }
 
     @Override
-    public User get(Object ...id) {
+    public User get(Object... id) {
         User user = null;
         try ( var connection = DataSource.getConnection()) {
             if (connection == null) {
                 throw new ConnectException("Cannot connect to database");
             }
             try ( var stm = connection.createStatement()) {
-                var result = stm.executeQuery("Select * from " + tableName + 
-                        " where " + PRIMARYKEY + " = '" + id[0] + "' and " + PASSWORD + " = '" + id[1] + "'");
-                BankAccountRepository accountRepos = new BankAccountRepository();
-                if (result.next()) {
-                    return new User(
-                            result.getString(PRIMARYKEY)).setAccount(
-                            accountRepos.get(result.getString(BANKACCOUNT))
-                    );
-                } 
+
+                if (id.length == 1) {
+                    var result = stm.executeQuery("Select * from " + tableName
+                            + " where " + PRIMARYKEY + " = '" + id[0] + "'");
+                    if (result.next()) {
+                        return new User(
+                                result.getString(PRIMARYKEY)
+                        );
+                    }
+                } else if (id.length == 2) {
+                    var result = stm.executeQuery("Select * from " + tableName
+                            + " where " + PRIMARYKEY + " = '" + id[0] + "' and " + PASSWORD + " = '" + id[1] + "'");
+                    BankAccountRepository accountRepos = new BankAccountRepository();
+                    if (result.next()) {
+                        return new User(result.getString(PRIMARYKEY)).setAccount(
+                                accountRepos.get(result.getString(BANKACCOUNT)));
+                    }
+                }
+
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -76,8 +86,22 @@ public class UserRepository extends DataSource<User> {
     }
 
     @Override
-    public boolean insert(User object) {
-        return false;
+    public boolean insert(User object) throws Exception {
+
+        try ( var connection = DataSource.getConnection();  var stm = connection.createStatement()) {
+            User user = get(object.getUsername());
+
+            if (user == null) {
+                stm.execute("Insert into %s(%s, %s, %s) values('%s', '%s', '%s')".formatted(
+                        tableName, PRIMARYKEY, PASSWORD, BANKACCOUNT,
+                        object.getUsername(), object.getPassword(),
+                        object.getAccount().getBankAccountNumber()
+                ));
+            } else {
+                throw new Exception(object.getUsername() + " đã tồn tại, vui lòng chọn tên khác.");
+            }
+            return true;
+        }
     }
 
     @Override

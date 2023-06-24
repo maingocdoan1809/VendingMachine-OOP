@@ -29,7 +29,7 @@ public abstract class DataSource<T> {
     
     abstract public ArrayList<T> all();
     abstract public T get(Object ...id);
-    abstract public boolean insert(T object);    
+    abstract public boolean insert(T object) throws Exception;    
     abstract public boolean update(T object) throws Exception;
 
     

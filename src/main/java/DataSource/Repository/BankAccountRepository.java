@@ -8,7 +8,6 @@ import DataSource.DataSource;
 import Models.BankAccount;
 import java.net.ConnectException;
 import java.util.ArrayList;
-import javax.security.auth.login.AccountNotFoundException;
 import javax.swing.JOptionPane;
 
 /**
@@ -40,9 +39,16 @@ public class BankAccountRepository extends DataSource<BankAccount> {
                 throw new ConnectException("Cannot connect to database");
             }
             try ( var stm = connection.createStatement()) {
+                String queryStr = "";
+                if (credential.length == 1) {
+                    queryStr = String.format("Select * from %s inner join %s on %s = %s where %s = '%s'",
+                            tableName, tableNameForeign, foreignKey, tableNameForeignKey, PRIMARYKEY, credential[0]);
+                } else {
+                    queryStr = String.format("Select * from %s inner join %s on %s = %s where %s = '%s' and %s = '%s'",
+                            tableName, tableNameForeign, foreignKey, tableNameForeignKey, PRIMARYKEY, credential[0], ACCOUNTPASSWORD, credential[1]);
+                }
                 var result = stm.executeQuery(
-                        String.format("Select * from %s inner join %s on %s = %s where %s = %s",
-                                tableName, tableNameForeign, foreignKey, tableNameForeignKey, PRIMARYKEY, credential[0]));
+                        queryStr);
                 if (result.next()) {
                     return new BankAccount(
                             result.getString(PRIMARYKEY)
@@ -50,8 +56,6 @@ public class BankAccountRepository extends DataSource<BankAccount> {
                             .setBankName(result.getString(BANKNAME))
                             .setBankBalance(result.getFloat(ACCOUNTBALANCE));
 
-                } else {
-                    throw new AccountNotFoundException("Cannot find any bank");
                 }
             }
         } catch (Exception e) {

@@ -4,6 +4,16 @@
  */
 package Views;
 
+import DataSource.Repository.BankAccountRepository;
+import DataSource.Repository.UserRepository;
+import Models.BankAccount;
+import Models.User;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
 /**
  *
  * @author MAI NGOC DOAN
@@ -11,10 +21,32 @@ package Views;
 public class Register extends javax.swing.JFrame {
 
     /**
-     * Creates new form RegisterF
+     * Creates new form Register
      */
+    private long startTime = 0;
+    private BankAccount account = null;
+
     public Register() {
         initComponents();
+        this.txtBankAccount.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                JTextField txt = (JTextField) e.getSource();
+                getBankAccount(txt.getText(), new String(txtBankPassword.getPassword()));
+                startTime = e.getWhen();
+            }
+
+        });
+        this.txtBankPassword.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                JPasswordField txt = (JPasswordField) e.getSource();
+                getBankAccount(txtBankAccount.getText(), new String(txt.getPassword()));
+                startTime = e.getWhen();
+            }
+
+        });
+
     }
 
     /**
@@ -38,7 +70,7 @@ public class Register extends javax.swing.JFrame {
         javax.swing.JLabel Username4 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
         txtUsername = new javax.swing.JTextField();
-        javax.swing.JTextField txtBankAUserName = new javax.swing.JTextField();
+        txtBankAUserName = new javax.swing.JTextField();
         javax.swing.JLabel Username5 = new javax.swing.JLabel();
         txtBankAccount = new javax.swing.JTextField();
         txtBankName = new javax.swing.JTextField();
@@ -66,6 +98,11 @@ public class Register extends javax.swing.JFrame {
         btnRegister.setBackground(new java.awt.Color(204, 204, 255));
         btnRegister.setForeground(new java.awt.Color(0, 0, 51));
         btnRegister.setText("Register");
+        btnRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegisterActionPerformed(evt);
+            }
+        });
 
         Username2.setText("Re-type password");
 
@@ -170,11 +207,64 @@ public class Register extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
+
+        String txtUsername = this.txtUsername.getText();
+        String txtPassword = new String(this.txtPassword.getPassword()).trim();
+        String txtRetypePassword = new String(this.txtRetypePassword.getPassword()).trim();
+
+        if (txtPassword.equals("") || txtUsername.equals("") || txtRetypePassword.equals("")) {
+            JOptionPane.showMessageDialog(null, "Vui lòng không để trống dữ liệu.");
+            return;
+        }
+
+        if (!txtPassword.equals(txtRetypePassword)) {
+            JOptionPane.showMessageDialog(null, "Mật khẩu không khớp.");
+            return;
+        }
+
+        if (this.account == null) {
+            JOptionPane.showMessageDialog(null, "Không tìm thấy tài khoản ngân hàng của bạn.");
+            return;
+        }
+
+        UserRepository userRepos = new UserRepository();
+
+        try{ 
+            userRepos.insert(
+                new User(txtUsername)
+                    .setPassword(txtPassword)
+                    .setAccount(account)
+            );
+            JOptionPane.showMessageDialog(null, "Tạo tài khoản thành công");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+
+        }
+    }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private void getBankAccount(String bankAccount, String bankPassword) {
+        if (!bankAccount.equals("") && !bankPassword.equals("")) {
+            BankAccountRepository bankRepos = new BankAccountRepository();
+            BankAccount tryAccount = bankRepos.get(bankAccount, bankPassword);
+            if (tryAccount != null) {
+                this.account = tryAccount;
+                this.txtBankAUserName.setText(tryAccount.getBankAccountUsername());
+                this.txtBankName.setText(tryAccount.getBankName());
+            } else {
+                this.txtBankAUserName.setText("");
+                this.txtBankName.setText("");
+            }
+
+        }
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRegister;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JTextField txtBankAUserName;
     private javax.swing.JTextField txtBankAccount;
     private javax.swing.JTextField txtBankName;
     private javax.swing.JPasswordField txtBankPassword;
