@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 02, 2023 at 03:03 AM
+-- Generation Time: Jul 03, 2023 at 01:28 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.1.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `bankaccounts` (
 --
 
 INSERT INTO `bankaccounts` (`account_number`, `account_name`, `account_password`, `account_balance`, `bank_id`) VALUES
-('280254581809', 'Mai Ngọc Đoàn', '123456789', 882500, 1);
+('280254581809', 'Mai Ngọc Đoàn', '123456789', 842500, 1);
 
 -- --------------------------------------------------------
 
@@ -76,6 +76,13 @@ CREATE TABLE `history` (
   `price` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
+--
+-- Dumping data for table `history`
+--
+
+INSERT INTO `history` (`id`, `user`, `product`, `time`, `price`) VALUES
+(2, 'doandeptrai', 1, '2023-07-03', 10000);
+
 -- --------------------------------------------------------
 
 --
@@ -95,7 +102,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `remain`, `image`) VALUES
-(1, 'Coca Cola(320ml)', 10000, 14, NULL),
+(1, 'Coca Cola(320ml)', 10000, 10, NULL),
 (2, 'Pepsi(320ml)', 11000, 20, NULL),
 (3, 'Sting (320ml)', 10500, 20, NULL),
 (4, 'Milk Coffee', 15000, 23, NULL),
@@ -175,6 +182,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `banks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `history`
+--
+ALTER TABLE `history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `products`

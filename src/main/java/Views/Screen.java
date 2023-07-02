@@ -8,6 +8,7 @@ import DataSource.Repository.ProductRepository;
 import Models.Command.SystemCommand.AddProductCommand;
 import Models.Command.SystemCommand.DecorateButtonCommand;
 import Models.Command.SystemCommand.RechargeCommand;
+import Models.Command.SystemCommand.ViewReportCommand;
 import Models.Command.UserCommand.BuyGoodsCommand;
 import Models.Observer.Observer;
 import Models.Observer.Subject;
@@ -43,6 +44,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         showUserInfo(false);
         this.btnAddProduct.setVisible(false);
+        this.btnViewReport.setVisible(false);
 
     }
 
@@ -197,6 +199,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
         btnDone = new javax.swing.JButton();
         btnAddMore = new javax.swing.JButton();
         btnAddProduct = new javax.swing.JButton();
+        btnViewReport = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
@@ -285,6 +288,14 @@ public class Screen extends javax.swing.JPanel implements Observer {
             }
         });
 
+        btnViewReport.setBackground(new java.awt.Color(153, 153, 255));
+        btnViewReport.setText("Xem thống kê tháng");
+        btnViewReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewReportActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -313,12 +324,14 @@ public class Screen extends javax.swing.JPanel implements Observer {
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(txtAvalibility, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnAddMore, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnAddMore, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnViewReport, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -336,7 +349,9 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addComponent(btnAddMore)
                 .addGap(7, 7, 7)
                 .addComponent(btnDone)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 153, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 118, Short.MAX_VALUE)
+                .addComponent(btnViewReport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnAddProduct)
                 .addGap(18, 18, 18)
                 .addComponent(btnRecharge)
@@ -602,6 +617,10 @@ public class Screen extends javax.swing.JPanel implements Observer {
         new AddProductCommand(this).execute();
     }//GEN-LAST:event_btnAddProductActionPerformed
 
+    private void btnViewReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewReportActionPerformed
+        new ViewReportCommand().execute();
+    }//GEN-LAST:event_btnViewReportActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddMore;
@@ -633,6 +652,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
     private javax.swing.JButton btnSlot7;
     private javax.swing.JButton btnSlot8;
     private javax.swing.JButton btnSlot9;
+    private javax.swing.JButton btnViewReport;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabelABalance;
@@ -663,6 +683,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
             this.txtUName.setText(user.getUsername());
             this.txtAvalibility.setText(Utility.toMoney(user.getCurrentMoney()));
             this.btnAddProduct.setVisible(user.isAdmin());
+            this.btnViewReport.setVisible(user.isAdmin());
             showUserInfo(true);
         } else if (subject == this.user) {
             this.user.register(this);

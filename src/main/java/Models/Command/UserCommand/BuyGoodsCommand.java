@@ -5,8 +5,10 @@
 package Models.Command.UserCommand;
 
 import DataSource.Repository.BankAccountRepository;
+import DataSource.Repository.HistoryRepository;
 import DataSource.Repository.ProductRepository;
 import Models.BankAccount;
+import Models.History;
 import Models.Product;
 import Models.User;
 import javax.security.auth.callback.ConfirmationCallback;
@@ -48,6 +50,8 @@ public class BuyGoodsCommand extends ProductCommand {
                     // update:
                     BankAccountRepository bankRepos = new BankAccountRepository();
                     ProductRepository productRepos = new ProductRepository();
+                    HistoryRepository historyRepos = new HistoryRepository();
+                    
                     bankRepos.update(
                         new BankAccount(userAccount.getBankAccountNumber())
                         .setBankBalance(currBalance - this.product.getPrice())
@@ -56,6 +60,9 @@ public class BuyGoodsCommand extends ProductCommand {
                         new Product(this.product.getId()).
                         setRemainNums(this.product.getRemainNums() - 1)
                     );
+                    // save history:
+                    historyRepos.insert(new History(this.user.getUsername(), 
+                            this.product.getId(), this.product.getPrice()));
                     // make changes to local data:
                     userAccount.setBankBalance(currBalance - this.product.getPrice());
                     this.product.setRemainNums(this.product.getRemainNums() - 1);
