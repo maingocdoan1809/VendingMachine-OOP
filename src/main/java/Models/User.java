@@ -18,11 +18,18 @@ public class User implements Subject {
     private float currentMoney = (float)0.0;
     private BankAccount account = null;
     private Observer observer = null;
-
+    private boolean _isAdmin = false;
     public User(String username) {
         this.username = username;
     }
-
+    public boolean isAdmin() {
+        return this._isAdmin;
+    }
+ 
+    public User setAdmin() {
+        this._isAdmin = true;
+        return this;
+    }
     public String getPassword() {
         return password;
     }

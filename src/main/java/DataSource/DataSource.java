@@ -26,7 +26,6 @@ public abstract class DataSource<T> {
         }
         
     }
-    
     abstract public ArrayList<T> all();
     abstract public T get(Object ...id);
     abstract public boolean insert(T object) throws Exception;    

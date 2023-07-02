@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 24, 2023 at 01:19 PM
+-- Generation Time: Jul 02, 2023 at 03:03 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.1.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `bankaccounts` (
 --
 
 INSERT INTO `bankaccounts` (`account_number`, `account_name`, `account_password`, `account_balance`, `bank_id`) VALUES
-('280254581809', 'Mai Ngọc Đoàn', '123456789', 985000, 1);
+('280254581809', 'Mai Ngọc Đoàn', '123456789', 882500, 1);
 
 -- --------------------------------------------------------
 
@@ -95,10 +95,15 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `remain`, `image`) VALUES
-(1, 'Coca Cola(320ml)', 10000, 20, NULL),
+(1, 'Coca Cola(320ml)', 10000, 14, NULL),
 (2, 'Pepsi(320ml)', 11000, 20, NULL),
-(3, 'Sting (320ml)', 10500, 0, NULL),
-(4, 'Milk Coffee', 15000, 0, NULL);
+(3, 'Sting (320ml)', 10500, 20, NULL),
+(4, 'Milk Coffee', 15000, 23, NULL),
+(5, 'Sprite', 12500, 9, NULL),
+(7, 'XX', 30000, 20, NULL),
+(8, 'YY', 30, 30, NULL),
+(9, 'ZZ', 30000, 30, NULL),
+(10, 'ZKS', 10, 23, NULL);
 
 -- --------------------------------------------------------
 
@@ -109,15 +114,18 @@ INSERT INTO `products` (`id`, `name`, `price`, `remain`, `image`) VALUES
 CREATE TABLE `users` (
   `username` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
-  `bank_account` varchar(100) NOT NULL
+  `bank_account` varchar(100) NOT NULL,
+  `is_admin` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`username`, `password`, `bank_account`) VALUES
-('maingocdoan', '123456', '280254581809');
+INSERT INTO `users` (`username`, `password`, `bank_account`, `is_admin`) VALUES
+('doandeptrai', '12345678', '280254581809', 1),
+('maingocdoan', '123456', '280254581809', NULL),
+('maingocdoan1809', '1234', '280254581809', NULL);
 
 --
 -- Indexes for dumped tables
@@ -172,7 +180,7 @@ ALTER TABLE `banks`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

@@ -20,6 +20,7 @@ public class UserRepository extends DataSource<User> {
     public static String PRIMARYKEY = "username";
     public static String PASSWORD = "password";
     public static String BANKACCOUNT = "bank_account";
+    public static String ISADMIN = "is_admin";
 
     @Override
     public ArrayList<User> all() {
@@ -64,17 +65,28 @@ public class UserRepository extends DataSource<User> {
                     var result = stm.executeQuery("Select * from " + tableName
                             + " where " + PRIMARYKEY + " = '" + id[0] + "'");
                     if (result.next()) {
-                        return new User(
+                        user = new User(
                                 result.getString(PRIMARYKEY)
                         );
+
+                        if (result.getInt(ISADMIN) != 0) {
+                            user = user.setAdmin();
+                        }
+                        return user;
                     }
                 } else if (id.length == 2) {
                     var result = stm.executeQuery("Select * from " + tableName
                             + " where " + PRIMARYKEY + " = '" + id[0] + "' and " + PASSWORD + " = '" + id[1] + "'");
                     BankAccountRepository accountRepos = new BankAccountRepository();
                     if (result.next()) {
-                        return new User(result.getString(PRIMARYKEY)).setAccount(
+                        System.out.println(result.getInt(ISADMIN));
+
+                        user = new User(result.getString(PRIMARYKEY)).setAccount(
                                 accountRepos.get(result.getString(BANKACCOUNT)));
+                        if (result.getInt(ISADMIN) != 0) {
+                            user = user.setAdmin();
+                        }
+                        return user;
                     }
                 }
 

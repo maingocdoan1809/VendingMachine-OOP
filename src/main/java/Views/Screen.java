@@ -5,6 +5,7 @@
 package Views;
 
 import DataSource.Repository.ProductRepository;
+import Models.Command.SystemCommand.AddProductCommand;
 import Models.Command.SystemCommand.DecorateButtonCommand;
 import Models.Command.SystemCommand.RechargeCommand;
 import Models.Command.UserCommand.BuyGoodsCommand;
@@ -34,6 +35,18 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
     public Screen() {
         initComponents();
+        initButtons();
+
+        this.txtPName.setText("No selection");
+        this.txtPNum.setText("No selection");
+        this.txtPPrice.setText("No selection");
+
+        showUserInfo(false);
+        this.btnAddProduct.setVisible(false);
+
+    }
+
+    private void initButtons() {
         buttons = new HashMap<>();
         buttons.put("1", this.btnSlot1);
         buttons.put("2", this.btnSlot2);
@@ -63,28 +76,49 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         ProductRepository pRespo = new ProductRepository();
 
-        this.txtPName.setText("No selection");
-        this.txtPNum.setText("No selection");
-        this.txtPPrice.setText("No selection");
-
         for (Map.Entry<String, JButton> entry : buttons.entrySet()) {
             Product p = pRespo.get(entry.getKey());
             populateButtonWithProduct(entry.getValue(), p);
         }
+    }
 
-        showUserInfo(false);
+    private void updateProduct(Product p) {
+        String input = JOptionPane.showInputDialog(null, "Input new Quantity");
+        int inputInt = 0;
+        try {
+            if (input.equals("")) {
+                return;
+            }
+            inputInt = Integer.parseInt(input);
+
+            ProductRepository pRepos = new ProductRepository();
+            p.setRemainNums(inputInt);
+            if (pRepos.update(p)) {
+                JOptionPane.showMessageDialog(null, "Updated");
+            } else {
+                JOptionPane.showMessageDialog(null, "Error");
+
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Please enter a valid number.");
+        }
     }
 
     final private void populateButtonWithProduct(JButton button, Product p) {
         if (p != null) {
             button.setText(p.getName());
-
             if (p.getRemainNums() == 0) {
                 new DecorateButtonCommand(
                         button,
                         DecorateButtonCommand.ButtonState.SOLDOUT)
                         .execute();
                 selectedButton = null;
+            } else {
+                new DecorateButtonCommand(
+                        button,
+                        DecorateButtonCommand.ButtonState.READY)
+                        .execute();
             }
             p.register(this);
         } else {
@@ -94,37 +128,45 @@ public class Screen extends javax.swing.JPanel implements Observer {
                     .execute();
 
         }
-        if (button.getMouseListeners().length == 1) {
-            button.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
-                    if (p != null && p.getRemainNums() > 0) {
-                        if (selectedButton != null) {
-                            new DecorateButtonCommand(
-                                selectedButton,
-                                 DecorateButtonCommand.ButtonState.READY)
-                                .execute();
-                        }
-                        selectedButton = button;
+        for (var i : button.getMouseListeners()) {
+            button.removeMouseListener(i);
+        }
 
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (p != null && p.getRemainNums() > 0) {
+                    if (selectedButton != null) {
                         new DecorateButtonCommand(
                                 selectedButton,
-                                DecorateButtonCommand.ButtonState.SELECTED)
+                                DecorateButtonCommand.ButtonState.READY)
                                 .execute();
+                    }
+                    selectedButton = button;
 
-                        txtPName.setText(p.getName());
-                        txtPNum.setText(p.getRemainNums() + "");
-                        txtPPrice.setText(p.getPriceFormat());
-                        if (evt.getClickCount() == 2) {
-                            handleUserBuyingProductEvent(p);
-                        }
+                    new DecorateButtonCommand(
+                            selectedButton,
+                            DecorateButtonCommand.ButtonState.SELECTED)
+                            .execute();
+  
+                    txtPName.setText(p.getName());
+                    txtPNum.setText(p.getRemainNums() + "");
+                    txtPPrice.setText(p.getPriceFormat());
+                    if (evt.getClickCount() == 2) {
+                        handleUserBuyingProductEvent(p);
+                    }
+                } else {
+                    if (user != null && user.isAdmin()) {
+                        updateProduct(p);
+                        populateButtonWithProduct(button, p);
                     } else {
                         JOptionPane.showMessageDialog(button, "Not available");
+
                     }
-
                 }
-            });
 
-        }
+            }
+        });
+
     }
 
     private void handleUserBuyingProductEvent(Product product) {
@@ -154,6 +196,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
         txtAvalibility = new javax.swing.JLabel();
         btnDone = new javax.swing.JButton();
         btnAddMore = new javax.swing.JButton();
+        btnAddProduct = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
@@ -234,15 +277,20 @@ public class Screen extends javax.swing.JPanel implements Observer {
             }
         });
 
+        btnAddProduct.setBackground(new java.awt.Color(153, 153, 255));
+        btnAddProduct.setText("Thêm sản phẩm");
+        btnAddProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddProductActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtAvalibility, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -257,11 +305,20 @@ public class Screen extends javax.swing.JPanel implements Observer {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(btnDone, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(txtAvalibility, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnAddMore, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnAddMore, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -279,7 +336,9 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addComponent(btnAddMore)
                 .addGap(7, 7, 7)
                 .addComponent(btnDone)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 194, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 153, Short.MAX_VALUE)
+                .addComponent(btnAddProduct)
+                .addGap(18, 18, 18)
                 .addComponent(btnRecharge)
                 .addContainerGap())
         );
@@ -523,25 +582,30 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         this.user = null;
         showUserInfo(false);
-        
+
     }//GEN-LAST:event_btnDoneActionPerformed
 
     private void btnAddMoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMoreActionPerformed
         String input = JOptionPane.showInputDialog("Nhập số tiền bạn muốn nạp thêm", 0);
-        
+
         float userInputMoney = (float) 0.0;
         try {
             userInputMoney = Float.parseFloat(input);
             this.user.setCurrentMoney(this.user.getCurrentMoney() + userInputMoney);
             this.user.notifyObservers();
-        } catch(Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Bạn phải nhập một số, vui lòng thử lại");
         }
     }//GEN-LAST:event_btnAddMoreActionPerformed
 
+    private void btnAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddProductActionPerformed
+        new AddProductCommand(this).execute();
+    }//GEN-LAST:event_btnAddProductActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddMore;
+    private javax.swing.JButton btnAddProduct;
     private javax.swing.JButton btnDone;
     private javax.swing.JButton btnRecharge;
     private javax.swing.JButton btnSlot1;
@@ -598,6 +662,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
             this.user.register(this);
             this.txtUName.setText(user.getUsername());
             this.txtAvalibility.setText(Utility.toMoney(user.getCurrentMoney()));
+            this.btnAddProduct.setVisible(user.isAdmin());
             showUserInfo(true);
         } else if (subject == this.user) {
             this.user.register(this);
@@ -608,11 +673,18 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
             Product p = (Product) subject;
             this.txtPNum.setText(p.getRemainNums() + "");
-            this.txtPPrice.setText( Utility.toMoney(p.getPrice()) );
+            this.txtPPrice.setText(Utility.toMoney(p.getPrice()));
             this.txtPName.setText(p.getName());
 
             JButton btnWithP = this.buttons.get(p.getId() + "");
             populateButtonWithProduct(btnWithP, p);
+
+        } else if (subject instanceof AddProduct) {
+            ProductRepository pRespo = new ProductRepository();
+
+            Product p = ((AddProduct) subject).getNewProduct();
+            var button = buttons.get(p.getId() + "");
+            populateButtonWithProduct(button, p);
 
         }
 
