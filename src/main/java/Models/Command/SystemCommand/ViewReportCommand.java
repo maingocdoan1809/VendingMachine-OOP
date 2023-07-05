@@ -10,6 +10,8 @@ import Views.Report;
  *
  * @author MAI NGOC DOAN
  */
+
+ // xem báo cáo thống kê
 public class ViewReportCommand extends SystemCommand{
 
     @Override

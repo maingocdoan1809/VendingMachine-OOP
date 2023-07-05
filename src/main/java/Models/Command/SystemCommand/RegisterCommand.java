@@ -9,7 +9,6 @@ package Models.Command.SystemCommand;
  * @author Admin
  */
 public class RegisterCommand extends SystemCommand{
-
     @Override
     public void execute() {
     }

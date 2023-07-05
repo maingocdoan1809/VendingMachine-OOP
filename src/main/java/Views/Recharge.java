@@ -17,6 +17,10 @@ import javax.swing.JOptionPane;
  *
  * @author Admin
  */
+
+ /**
+  * Class này để show ra giao diện đăng nhập cho user khác
+  */
 public class Recharge extends javax.swing.JFrame implements Subject {
 
     ArrayList<Observer> observers = new ArrayList<>();
@@ -164,7 +168,9 @@ public class Recharge extends javax.swing.JFrame implements Subject {
             if (username.trim().equals("") || password.equals("") || money.trim().equals("")) {
                 throw new InvalidParameterException("You have to fill in all fields.");
             }
+            // tạo một repos tới user và lấy luôn người có username đó
             user = new UserRepository().get(username, password);
+            // nếu không tồn tại thì báo lỗi
             if (user == null) {
                 throw new Exception("Your username or password is not correct.");
             }

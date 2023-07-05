@@ -11,6 +11,8 @@ import Views.Recharge;
  *
  * @author Admin
  */
+
+ // Command cho việc đăng nhập tài khoản.
 public class RechargeCommand extends SystemCommand{
     
     private Observer caller;
@@ -21,6 +23,7 @@ public class RechargeCommand extends SystemCommand{
 
     @Override
     public void execute() {
+        // tạo và hiển thị form đăng nhập
         Recharge l = new Recharge();
         l.register(caller);
         l.setVisible(true);
