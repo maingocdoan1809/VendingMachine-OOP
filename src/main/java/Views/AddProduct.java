@@ -15,13 +15,14 @@ import javax.swing.JOptionPane;
  * @author MAI NGOC DOAN
  */
 /**
- * Adproduct là một subject. Ở đây thường là Screen (Observer) gọi đến command là tạo một sản phẩm mới (Elearning)
+ * Adproduct là một subject. Ở đây thường là Screen (Observer) gọi đến command
+ * là tạo một sản phẩm mới (Elearning)
  */
 public class AddProduct extends javax.swing.JPanel implements Subject {
 
     private Observer caller = null;
     private Product newProduct = null;
-    
+
     /**
      * Creates new form AddProduct
      */
@@ -129,12 +130,39 @@ public class AddProduct extends javax.swing.JPanel implements Subject {
         ProductRepository pRepos = new ProductRepository();
 
         try {
+            String name = this.txtPName.getText();
+            String price = this.txtPPrice.getText();
+            String remain = this.txtPRemain.getText();
+            
+            if (name.equals("") || price.equals("") || remain.equals("")) {
+                throw new Exception("Vui lòng nhập tất cả thông tin");
+            }
+            
+            float fprice = (float) 0.0;
+            
+            try {
+                fprice = Float.parseFloat(price);
+            } catch(Exception e) {
+                throw new Exception("Giá tiền không hợp lệ.");
+            }
+            
+            int iremain =0;
+            
+            try {
+                iremain = Integer.parseInt(remain);
+            } catch(Exception e) {
+                throw new Exception("Số lượng không hợp lệ");
+            }
+            
+            if (fprice )
+            
             // lấy id hiện thời + 1 của bảng Product.
+
             Product p = new Product(pRepos.getNextId());
             // lưu các thông tin cần thiết
-            p.setName(this.txtPName.getText());
-            p.setPrice(Float.parseFloat(this.txtPPrice.getText()));
-            p.setRemainNums(Integer.parseInt(this.txtPRemain.getText()));
+            p.setName(name);
+            p.setPrice(fprice);
+            p.setRemainNums(iremain);
             // nếu lưu thành công thì sẽ redirect đến một file khác
             if (pRepos.insert(p)) {
                 newProduct = p;
@@ -142,7 +170,7 @@ public class AddProduct extends javax.swing.JPanel implements Subject {
             }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null, "");
         }
 
     }//GEN-LAST:event_btnAddActionPerformed
@@ -173,7 +201,8 @@ public class AddProduct extends javax.swing.JPanel implements Subject {
     public void notifyObservers() {
         this.caller.update(this);
     }
-    public Product getNewProduct(){
+
+    public Product getNewProduct() {
         return this.newProduct;
     }
 }
