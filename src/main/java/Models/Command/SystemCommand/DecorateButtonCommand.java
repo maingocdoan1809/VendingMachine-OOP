@@ -11,10 +11,17 @@ import javax.swing.JButton;
  *
  * @author MAI NGOC DOAN
  */
+
+ // Class này dùng để tô màu cho các nút chứa sản phẩm trên Screen.
 public class DecorateButtonCommand extends SystemCommand {
 
     private JButton button;
 
+    // Một enum lưu trạng thái của mỗi ô chứa nước như:
+    // READY: ô này có nước và sẵn sàng để bán
+    // EMPTY: ô này chưa được cài đặt nước.
+    // SOLDOUT: ô này được cài đặt thông tin nước, nhưng tạm thời hết hàng
+    // SELECTED: ô này đang được chọn.
     public static enum ButtonState {
         READY, EMPTY, SOLDOUT, SELECTED
     };
@@ -29,6 +36,7 @@ public class DecorateButtonCommand extends SystemCommand {
     @Override
     public void execute() {
 
+        // với mỗi một state thì ta sẽ tô màu khác nhau cho button đó
         switch (state) {
             case EMPTY -> {
                 this.button.setText("Empty");

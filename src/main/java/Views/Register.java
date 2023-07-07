@@ -18,6 +18,10 @@ import javax.swing.JTextField;
  *
  * @author MAI NGOC DOAN
  */
+
+ /**
+  * Form đắng kí cái gì học viên
+  */
 public class Register extends javax.swing.JFrame {
 
     /**
@@ -209,10 +213,12 @@ public class Register extends javax.swing.JFrame {
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
 
+        // lấy tấ cả thông tin trong trường
         String txtUsername = this.txtUsername.getText();
         String txtPassword = new String(this.txtPassword.getPassword()).trim();
         String txtRetypePassword = new String(this.txtRetypePassword.getPassword()).trim();
 
+        // nếu người dùng nhập sai thì phải báo lỗi
         if (txtPassword.equals("") || txtUsername.equals("") || txtRetypePassword.equals("")) {
             JOptionPane.showMessageDialog(null, "Vui lòng không để trống dữ liệu.");
             return;
@@ -230,6 +236,7 @@ public class Register extends javax.swing.JFrame {
 
         UserRepository userRepos = new UserRepository();
 
+        // nếu đến chỗ này vẫn tốt thì có nghĩa là ta sẽ lưu dữ liệu này vào database,
         try{ 
             userRepos.insert(
                 new User(txtUsername)
@@ -243,6 +250,9 @@ public class Register extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnRegisterActionPerformed
 
+    /**
+     * Hàm này để kiểm tra và update liên tục những sản phẩm bán chạy nhất cái đấy đâu
+     */
     private void getBankAccount(String bankAccount, String bankPassword) {
         if (!bankAccount.equals("") && !bankPassword.equals("")) {
             BankAccountRepository bankRepos = new BankAccountRepository();

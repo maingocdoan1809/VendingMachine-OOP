@@ -154,11 +154,13 @@ public class Report extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnViewReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewReportActionPerformed
+
+        // tạo một repository đến History
         HistoryRepository hisRes = new HistoryRepository();
-        
+        // kiểm tra các trường dữ liệu
         int month = Integer.parseInt( (String) this.jComboBox1.getSelectedItem());
         int year = Integer.parseInt( (String) this.jComboBox2.getSelectedItem());
-        
+        // query đến database
         var histories = hisRes.getByTime(month, year);
         var total = 0.0;
         for (var p : histories) {

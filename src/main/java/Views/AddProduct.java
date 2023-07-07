@@ -14,6 +14,9 @@ import javax.swing.JOptionPane;
  *
  * @author MAI NGOC DOAN
  */
+/**
+ * Adproduct là một subject. Ở đây thường là Screen (Observer) gọi đến command là tạo một sản phẩm mới (Elearning)
+ */
 public class AddProduct extends javax.swing.JPanel implements Subject {
 
     private Observer caller = null;
@@ -119,16 +122,20 @@ public class AddProduct extends javax.swing.JPanel implements Subject {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPPriceActionPerformed
 
+    // lưu sự kiện thêm mới sản phẩm
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
 
+        // Tạo một repository đến Product.
         ProductRepository pRepos = new ProductRepository();
 
         try {
+            // lấy id hiện thời + 1 của bảng Product.
             Product p = new Product(pRepos.getNextId());
+            // lưu các thông tin cần thiết
             p.setName(this.txtPName.getText());
             p.setPrice(Float.parseFloat(this.txtPPrice.getText()));
             p.setRemainNums(Integer.parseInt(this.txtPRemain.getText()));
-            
+            // nếu lưu thành công thì sẽ redirect đến một file khác
             if (pRepos.insert(p)) {
                 newProduct = p;
                 this.notifyObservers();

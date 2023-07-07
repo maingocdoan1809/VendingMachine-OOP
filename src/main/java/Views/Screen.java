@@ -25,6 +25,9 @@ import javax.swing.JOptionPane;
  *
  * @author Admin
  */
+/**
+ * Đây là giao diện chính của app này.
+ */
 public class Screen extends javax.swing.JPanel implements Observer {
 
     /**
@@ -55,6 +58,15 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
     private void initButtons() {
         buttons = new HashMap<>();
+        // mỗi màn hình sẽ có sức chứa 25 slot. Mỗi một button là một khay chứa nước.
+        /**
+         * Mỗi một sản phẩm sẽ tương ứng với một button
+         * Một HashMap dùng để lưu các nút này kèm theo giá trị id của sản phẩm trong bảng product.
+         */
+        /**
+         * Nếu this.btnSlot1 muốn cấu hình cho nó bán mặt hàng '123' thì ta sẽ lưu như sau:
+         *  buttons.put("123", this.btnSlot1);
+         */
         buttons.put("1", this.btnSlot1);
         buttons.put("2", this.btnSlot2);
         buttons.put("3", this.btnSlot3);
@@ -84,11 +96,15 @@ public class Screen extends javax.swing.JPanel implements Observer {
         ProductRepository pRespo = new ProductRepository();
 
         for (Map.Entry<String, JButton> entry : buttons.entrySet()) {
+            // lấy sản phẩm ra từ repository
             Product p = pRespo.get(entry.getKey());
+            // gán màu sắc và thêm sự kiện onclick cho nó
             populateButtonWithProduct(entry.getValue(), p);
         }
     }
-
+    /**
+     * Hàm này dùng để update lại số lượng của các slot trong Screen
+     */
     private void updateProduct(Product p) {
         String input = JOptionPane.showInputDialog(null, "Input new Quantity");
         int inputInt = 0;
@@ -111,7 +127,9 @@ public class Screen extends javax.swing.JPanel implements Observer {
             JOptionPane.showMessageDialog(null, "Please enter a valid number.");
         }
     }
-
+    /**
+     * Tô màu cho các nút bấm, dễ phân biệt:))
+     */
     final private void populateButtonWithProduct(JButton button, Product p) {
         if (p != null) {
             button.setText(p.getName());
@@ -135,6 +153,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
                     .execute();
 
         }
+        // nếu có sự kiện nào khác, hãy xóa nó
         for (var i : button.getMouseListeners()) {
             button.removeMouseListener(i);
         }
@@ -176,11 +195,13 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
     }
 
+    // Kiểm tra sự xác thực khi mua hàng.
     private void handleUserBuyingProductEvent(Product product) {
-
+        // nếu không có user nào thì ta phải show form đăng nhập
         if (this.user == null) {
             new RechargeCommand(this).execute();
         } else {
+            // nếu đã đăng nhập rồi thì ok
             new BuyGoodsCommand(this.user, product).execute();
         }
 

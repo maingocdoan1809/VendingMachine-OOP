@@ -8,6 +8,10 @@ package Models;
  *
  * @author Admin
  */
+
+ /**
+  * Model lưu các thuộc tính của Tài khoản gân hàng, các model khác tương tự
+  */
 public class BankAccount {
     private String bankAccountUsername;
     private String bankName;
