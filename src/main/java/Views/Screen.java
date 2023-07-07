@@ -45,6 +45,11 @@ public class Screen extends javax.swing.JPanel implements Observer {
         showUserInfo(false);
         this.btnAddProduct.setVisible(false);
         this.btnViewReport.setVisible(false);
+        
+        ProductRepository p = new ProductRepository();
+        
+        
+        this.jbestsellingtxt.setText("Best selling in month: " + p.getTopSelling().getName());
 
     }
 
@@ -235,7 +240,8 @@ public class Screen extends javax.swing.JPanel implements Observer {
         btnSlot23 = new javax.swing.JButton();
         btnSlot24 = new javax.swing.JButton();
         btnSlot25 = new javax.swing.JButton();
-        jLabel5 = new javax.swing.JLabel();
+        jbestsellingtxt = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.BorderLayout());
@@ -537,10 +543,15 @@ public class Screen extends javax.swing.JPanel implements Observer {
         btnSlot25.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jPanel4.add(btnSlot25);
 
-        jLabel5.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel5.setFont(new java.awt.Font("Agent Orange", 0, 36)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(51, 0, 102));
-        jLabel5.setText("Live every drop");
+        jbestsellingtxt.setBackground(new java.awt.Color(0, 0, 0));
+        jbestsellingtxt.setFont(new java.awt.Font("Agent Orange", 2, 14)); // NOI18N
+        jbestsellingtxt.setForeground(new java.awt.Color(51, 0, 102));
+        jbestsellingtxt.setText("Best selling: ");
+
+        jLabel7.setBackground(new java.awt.Color(0, 0, 0));
+        jLabel7.setFont(new java.awt.Font("Agent Orange", 0, 36)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(51, 0, 102));
+        jLabel7.setText("Live every drop");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -550,25 +561,34 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addGap(48, 48, 48)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(210, Short.MAX_VALUE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(46, 46, 46))))
+                        .addGap(46, 46, 46))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jbestsellingtxt))
+                        .addGap(0, 1757, Short.MAX_VALUE))))
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(58, 58, 58)
+                    .addComponent(jLabel7)
+                    .addContainerGap(1938, Short.MAX_VALUE)))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(63, 63, 63)
-                .addComponent(jLabel5)
-                .addGap(42, 42, 42)
+                .addGap(127, 127, 127)
+                .addComponent(jbestsellingtxt)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(56, 56, 56)
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
+                .addGap(104, 104, 104)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
                 .addGap(42, 42, 42))
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(73, 73, 73)
+                    .addComponent(jLabel7)
+                    .addContainerGap(418, Short.MAX_VALUE)))
         );
 
         add(jPanel2, java.awt.BorderLayout.CENTER);
@@ -597,7 +617,9 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         this.user = null;
         showUserInfo(false);
-
+        // turn of admin buttons:
+        this.btnAddProduct.setVisible(false);
+        this.btnViewReport.setVisible(false);
     }//GEN-LAST:event_btnDoneActionPerformed
 
     private void btnAddMoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMoreActionPerformed
@@ -653,14 +675,15 @@ public class Screen extends javax.swing.JPanel implements Observer {
     private javax.swing.JButton btnSlot8;
     private javax.swing.JButton btnSlot9;
     private javax.swing.JButton btnViewReport;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabelABalance;
     private javax.swing.JLabel jLabelAname;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JLabel jbestsellingtxt;
     private javax.swing.JLabel txtAvalibility;
     private javax.swing.JLabel txtPName;
     private javax.swing.JLabel txtPNum;

@@ -73,6 +73,39 @@ public class ProductRepository extends DataSource<Product> {
         return null;
     }
 
+    public Product getTopSelling() {
+        BankAccount account = null;
+        try ( var connection = DataSource.getConnection()) {
+            if (connection == null) {
+                throw new ConnectException("Cannot connect to database");
+            }
+            try ( var stm = connection.createStatement()) {
+                var result = stm.executeQuery(
+                        "SELECT * from products WHERE products.id IN ("
+                        + "   SELECT id from ("
+                        + "        SELECT history.product as id, COUNT(history.product) as cnt from history\n"
+                        + "        GROUP by history.product"
+                        + "        ORDER BY cnt DESC"
+                        + "        Limit 3"
+                        + "   ) as b1"
+                        + ")");
+                if (result.next()) {
+                    return new Product(result.getInt(PRIMARYKEY))
+                            .setName(result.getString(PRODUCTNAME))
+                            .setImgPath(result.getString(PRODUCTIMAGE))
+                            .setPrice(result.getFloat(PRODUCTPRICE))
+                            .setRemainNums(result.getInt(PRODUCTREMAIN));
+
+                } else {
+                    return null;
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+        return null;
+    }
+
     @Override
     public boolean insert(Product object) throws Exception {
 
@@ -90,9 +123,9 @@ public class ProductRepository extends DataSource<Product> {
         }
         try ( var stm = connection.createStatement()) {
             connection.setAutoCommit(false);
-            System.out.println( String.format("Insert into %s(%s, %s, %s) values('%s', '%s', %d)",
-                            tableName, PRODUCTNAME, PRODUCTPRICE, PRODUCTREMAIN,
-                            name, price + "", remain));
+            System.out.println(String.format("Insert into %s(%s, %s, %s) values('%s', '%s', %d)",
+                    tableName, PRODUCTNAME, PRODUCTPRICE, PRODUCTREMAIN,
+                    name, price + "", remain));
             stm.execute(
                     String.format("Insert into %s(%s, %s, %s) values('%s', '%s', %d)",
                             tableName, PRODUCTNAME, PRODUCTPRICE, PRODUCTREMAIN,

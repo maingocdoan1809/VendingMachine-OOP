@@ -75,9 +75,7 @@ public class BuyGoodsCommand extends ProductCommand {
 
             }
 
-        } else {
-            JOptionPane.showMessageDialog(null, "No");
-        }
+        } 
     }
 
 }
