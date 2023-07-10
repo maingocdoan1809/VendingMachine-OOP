@@ -616,10 +616,12 @@ public class Screen extends javax.swing.JPanel implements Observer {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRechargeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRechargeActionPerformed
-
-        Recharge l = new Recharge();
-        l.register(this);
-        l.setVisible(true);
+        
+        
+        
+        var chooseMethod = new ChoosePaymentMethod(this);
+        chooseMethod.setVisible(true);
+        
 //        App.showAsForm(l);
 
     }//GEN-LAST:event_btnRechargeActionPerformed
