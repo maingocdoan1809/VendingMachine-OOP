@@ -4,6 +4,10 @@
  */
 package Views;
 
+import java.util.HashMap;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Admin
@@ -15,6 +19,32 @@ public class ListMoney extends javax.swing.JFrame {
      */
     public ListMoney() {
         initComponents();
+        HashMap<JButton, Integer> buttons = new HashMap<>();
+
+        buttons.put(jBtn1K, 1000);
+        buttons.put(jBtn2K, 2000);
+        buttons.put(jBtn5K, 5000);
+        buttons.put(jBtn10K, 10000);
+        buttons.put(jBtn20K, 20000);
+        buttons.put(jBtn50K, 50000);
+        buttons.put(jBtn100K, 100000);
+        buttons.put(jBtn200K, 200000);
+        buttons.put(jBtn500K, 500000);
+        
+        for (var entry : buttons.entrySet()) {
+            entry.getKey().addActionListener((e) -> {
+                var screen = Screen.getFirstCurrentInstance();
+                var cash =  screen.getUserInputCash();
+                var currentValue = entry.getValue();
+                if (cash.get(currentValue) == null) {
+                    cash.put(currentValue, 1);
+                } else {
+                    cash.put(currentValue, cash.get(currentValue) + 1);
+                }
+                screen.updateCashAmount(entry.getValue());
+                
+            });
+        }
     }
 
     /**
@@ -27,6 +57,7 @@ public class ListMoney extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton9 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         jBtn1K = new javax.swing.JButton();
         jBtn2K = new javax.swing.JButton();
         jBtn5K = new javax.swing.JButton();
@@ -40,45 +71,50 @@ public class ListMoney extends javax.swing.JFrame {
         jButton9.setText("jButton9");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        getContentPane().setLayout(new java.awt.GridLayout(2, 2));
+
+        jPanel1.setLayout(new java.awt.GridLayout(2, 2));
 
         jBtn1K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn1K.setText("1.000 VNĐ");
-        getContentPane().add(jBtn1K);
+        jBtn1K.setToolTipText("");
+        jPanel1.add(jBtn1K);
+        jBtn1K.getAccessibleContext().setAccessibleName("");
 
         jBtn2K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn2K.setText("2.000 VNĐ");
-        getContentPane().add(jBtn2K);
+        jPanel1.add(jBtn2K);
 
         jBtn5K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn5K.setText("5.000 VNĐ");
-        getContentPane().add(jBtn5K);
+        jPanel1.add(jBtn5K);
 
         jBtn10K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn10K.setText("10.000 VNĐ");
-        getContentPane().add(jBtn10K);
+        jPanel1.add(jBtn10K);
 
         jBtn20K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn20K.setText("20.000 VNĐ");
-        getContentPane().add(jBtn20K);
+        jPanel1.add(jBtn20K);
 
         jBtn50K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn50K.setText("50.000 VNĐ");
-        getContentPane().add(jBtn50K);
+        jPanel1.add(jBtn50K);
 
         jBtn100K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn100K.setText("100.000 VNĐ");
-        getContentPane().add(jBtn100K);
+        jPanel1.add(jBtn100K);
 
         jBtn200K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn200K.setText("200.000 VNĐ");
-        getContentPane().add(jBtn200K);
+        jPanel1.add(jBtn200K);
 
         jBtn500K.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jBtn500K.setText("500.000 VNĐ");
-        getContentPane().add(jBtn500K);
+        jPanel1.add(jBtn500K);
 
-        setSize(new java.awt.Dimension(763, 362));
+        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
+
+        setSize(new java.awt.Dimension(886, 397));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -94,5 +130,6 @@ public class ListMoney extends javax.swing.JFrame {
     private javax.swing.JButton jBtn50K;
     private javax.swing.JButton jBtn5K;
     private javax.swing.JButton jButton9;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }

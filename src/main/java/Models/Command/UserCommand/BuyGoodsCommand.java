@@ -11,17 +11,20 @@ import Models.BankAccount;
 import Models.History;
 import Models.Product;
 import Models.User;
+import Views.Screen;
 import javax.security.auth.callback.ConfirmationCallback;
 import javax.swing.JOptionPane;
+import Utils.PaymentMethod;
+import Views.ChoosePaymentMethod;
+import Views.ListMoney;
 
 /**
  *
  * @author Admin
  */
-
- /**
-  * Class command cho việc người dùng mua hàng
-  */
+/**
+ * Class command cho việc người dùng mua hàng
+ */
 public class BuyGoodsCommand extends ProductCommand {
 
     private User user;
@@ -32,9 +35,8 @@ public class BuyGoodsCommand extends ProductCommand {
         this.user = user;
     }
 
-    @Override
-    public void execute() {
-        
+    private void handlePaymentWitdCreditCard() {
+
         String price = Utils.Utility.toMoney(this.product.getPrice());
         // hỏi người dùng xem họ có muốn thanh toán sản phẩm này không
         int isConfirmed = JOptionPane.showConfirmDialog(null,
@@ -63,19 +65,19 @@ public class BuyGoodsCommand extends ProductCommand {
                     BankAccountRepository bankRepos = new BankAccountRepository();
                     ProductRepository productRepos = new ProductRepository();
                     HistoryRepository historyRepos = new HistoryRepository();
-                    
+
                     // update account, giảm tiền
                     bankRepos.update(
-                        new BankAccount(userAccount.getBankAccountNumber())
-                        .setBankBalance(currBalance - this.product.getPrice())
+                            new BankAccount(userAccount.getBankAccountNumber())
+                                    .setBankBalance(currBalance - this.product.getPrice())
                     );
                     // giảm số lượng sản phẩm
                     productRepos.update(
-                        new Product(this.product.getId()).
-                        setRemainNums(this.product.getRemainNums() - 1)
+                            new Product(this.product.getId()).
+                                    setRemainNums(this.product.getRemainNums() - 1)
                     );
                     // save history:
-                    historyRepos.insert(new History(this.user.getUsername(), 
+                    historyRepos.insert(new History(this.user.getUsername(),
                             this.product.getId(), this.product.getPrice()));
 
                     // giảm lượng tiền đặt cọc trên screen.
@@ -91,7 +93,49 @@ public class BuyGoodsCommand extends ProductCommand {
 
             }
 
-        } 
+        }
+    }
+
+    private void handlePaymentWithCash() {
+
+        String price = Utils.Utility.toMoney(this.product.getPrice());
+        // hỏi người dùng xem họ có muốn thanh toán sản phẩm này không
+        int isConfirmed = JOptionPane.showConfirmDialog(null,
+                "Bạn có muốn thanh toán "
+                + price + " cho sản phẩm này?");
+        // ok, mua
+        if (isConfirmed == ConfirmationCallback.YES) {
+            // tính toán xem tài khoản có đủ tiền không
+            float newAmount = Screen.getFirstCurrentInstance().getCurrentUserAmount();
+            if (newAmount < 0) {
+                // nếu không đủ thì thông báo
+                JOptionPane.showMessageDialog(null,
+                        "Tài khoản của bạn hiện không đủ " + price + " vui lòng nạp thêm tiền.");
+            } else {
+                // update tien trong ket.
+
+            }
+
+        }
+    }
+
+    @Override
+    public void execute() {
+        var method = Screen.getFirstCurrentInstance().getPaymentMethod();
+        if (method == PaymentMethod.CREDIT) {
+            handlePaymentWitdCreditCard();
+        } else if (method == PaymentMethod.CASH) {
+            handlePaymentWithCash();
+        } else {
+
+            float currentAmount = Screen.getFirstCurrentInstance().getCurrentUserAmount();
+
+            if (currentAmount == 0) {
+                JOptionPane.showMessageDialog(null, "Xin mời đưa tiền vào máy...");
+                new ListMoney().setVisible(true);
+            }
+
+        }
     }
 
 }

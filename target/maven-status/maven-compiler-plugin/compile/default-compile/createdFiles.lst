@@ -4,6 +4,7 @@ huce\vendingmachine\VendingMachine$1.class
 Models\Command\SystemCommand\AddProductCommand.class
 Views\ChoosePaymentMethod$2.class
 Models\Command\SystemCommand\DecorateButtonCommand.class
+Utils\PaymentMethod.class
 Views\Register$2.class
 Views\Recharge$2.class
 Views\Report$1.class
@@ -40,6 +41,7 @@ Models\Command\UserCommand\BuyGoodsCommand.class
 Views\App.class
 DataSource\Repository\HistoryRepository.class
 Views\Register.class
+DataSource\Repository\MoneyRepository.class
 Models\Command\UserCommand\ProductCommand.class
 Views\Screen.class
 Models\Command\SystemCommand\RegisterCommand.class

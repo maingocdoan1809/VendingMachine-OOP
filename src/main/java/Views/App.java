@@ -23,7 +23,7 @@ public class App extends javax.swing.JFrame {
 
     public App() {
         initComponents();
-        this.add(new Screen());
+        this.add(Screen.getFirstCurrentInstance());
     }
 
     public static void showAsForm(JPanel panel) {
