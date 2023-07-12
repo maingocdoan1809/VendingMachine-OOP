@@ -5,9 +5,8 @@
 package Utils;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.List;
 
 /**
  *
@@ -29,46 +28,42 @@ public class MoneyChanger {
         denom.put(500000, "Năm trăm nghìn đồng");
     }
 
-    private void _helper(int amount, HashMap<Integer, Integer> current, ArrayList<HashMap<Integer, Integer>> all) {
-
-        if (amount < 0) {
-            return;
-        }
-        if (amount == 0) {
-            var newHashMap = new HashMap<Integer, Integer>();
-            for(var entry : current.entrySet()) {
-                newHashMap.put(entry.getKey(), entry.getValue());
-            }
-            current.clear();
-            all.add(newHashMap);
-            return;
-        }
-        for (Integer d : this.denom.keySet()) {
-            if (d <= amount) {
-                int numCash = amount / d;
-                int remain = amount - numCash*d;
-                System.out.println("Amount: %d,  D: %d, Numcash: %d, remain: %d".formatted(amount,d, numCash, remain));
-                current.put(d, numCash);
-                _helper(remain, current, all);
-            }
-        }
-
+    public static List<List<Integer>> findCombinations(int[] arr, int m) {
+        List<List<Integer>> combinations = new ArrayList<>();
+        backtrack(combinations, new ArrayList<>(), arr, m, 0);
+        return combinations;
     }
 
-    public ArrayList<HashMap<Integer, Integer>> convert(int amount) {
-        var possible = new ArrayList<HashMap<Integer, Integer>>();
-        var curr = new HashMap<Integer, Integer>();
-        _helper(amount, curr, possible);
+    private static void backtrack(List<List<Integer>> combinations, List<Integer> currentCombination,
+            int[] arr, int remainingSum, int start) {
+        if (remainingSum == 0) {
+            combinations.add(new ArrayList<>(currentCombination));
+            return;
+        }
 
-        return possible;
+        for (int i = arr.length - 1; i >= start; i--) {
+            if (arr[i] <= remainingSum) {
+                currentCombination.add(arr[i]);
+                backtrack(combinations, currentCombination, arr, remainingSum - arr[i], i);
+                currentCombination.remove(currentCombination.size() - 1);
+            }
+        }
     }
 
     public static void main(String[] args) {
-        MoneyChanger c = new MoneyChanger();
+        int[] arr = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000};
+        int m = 13000;
 
-        var x = c.convert(7000);
-        for (var i : x) {
-            System.out.println(i);
+        List<List<Integer>> combinations = findCombinations(arr, m);
+        // combinations.sort((a, b) -> {
+        // if (a.size() > b.size()) {
+        // return 1;
+        // }
+        // return -1;
+        // });
+        // Print the combinations
+        for (List<Integer> combination : combinations) {
+            System.out.println(combination);
         }
     }
 
