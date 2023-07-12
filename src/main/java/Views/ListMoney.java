@@ -4,6 +4,7 @@
  */
 package Views;
 
+import DataSource.Repository.MoneyRepository;
 import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -30,19 +31,25 @@ public class ListMoney extends javax.swing.JFrame {
         buttons.put(jBtn100K, 100000);
         buttons.put(jBtn200K, 200000);
         buttons.put(jBtn500K, 500000);
-        
+
+        MoneyRepository moneyRepos = new MoneyRepository();
+
         for (var entry : buttons.entrySet()) {
             entry.getKey().addActionListener((e) -> {
-                var screen = Screen.getFirstCurrentInstance();
-                var cash =  screen.getUserInputCash();
-                var currentValue = entry.getValue();
-                if (cash.get(currentValue) == null) {
-                    cash.put(currentValue, 1);
+                if (moneyRepos.insert(entry.getValue())) {
+                    var screen = Screen.getFirstCurrentInstance();
+                    var cash = screen.getUserInputCash();
+                    var currentValue = entry.getValue();
+                    if (cash.get(currentValue) == null) {
+                        cash.put(currentValue, 1);
+                    } else {
+                        cash.put(currentValue, cash.get(currentValue) + 1);
+                    }
+                    screen.updateCashAmount(entry.getValue());
                 } else {
-                    cash.put(currentValue, cash.get(currentValue) + 1);
+                    JOptionPane.showMessageDialog(null, "Error");
                 }
-                screen.updateCashAmount(entry.getValue());
-                
+
             });
         }
     }

@@ -25,13 +25,13 @@ public class UserRepository extends DataSource<User> {
     @Override
     public ArrayList<User> all() {
         ArrayList<User> users = null;
-        try ( var connection = DataSource.getConnection()) {
+        try (var connection = DataSource.getConnection()) {
             if (connection == null) {
                 throw new ConnectException("Cannot connect to database");
             }
             users = new ArrayList<>();
 
-            try ( var stm = connection.createStatement()) {
+            try (var stm = connection.createStatement()) {
                 var result = stm.executeQuery("Select * from " + tableName);
                 BankAccountRepository accountRepos = new BankAccountRepository();
                 while (result.next()) {
@@ -55,11 +55,11 @@ public class UserRepository extends DataSource<User> {
     @Override
     public User get(Object... id) {
         User user = null;
-        try ( var connection = DataSource.getConnection()) {
+        try (var connection = DataSource.getConnection()) {
             if (connection == null) {
                 throw new ConnectException("Cannot connect to database");
             }
-            try ( var stm = connection.createStatement()) {
+            try (var stm = connection.createStatement()) {
 
                 if (id.length == 1) {
                     var result = stm.executeQuery("Select * from " + tableName
@@ -100,7 +100,7 @@ public class UserRepository extends DataSource<User> {
     @Override
     public boolean insert(User object) throws Exception {
 
-        try ( var connection = DataSource.getConnection();  var stm = connection.createStatement()) {
+        try (var connection = DataSource.getConnection(); var stm = connection.createStatement()) {
             User user = get(object.getUsername());
 
             if (user == null) {

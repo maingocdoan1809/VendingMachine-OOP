@@ -5,6 +5,7 @@
 package Views;
 
 import DataSource.Repository.ProductRepository;
+import Models.BankAccount;
 import Models.Command.SystemCommand.AddProductCommand;
 import Models.Command.SystemCommand.DecorateButtonCommand;
 import Models.Command.SystemCommand.RechargeCommand;
@@ -228,7 +229,21 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 new BuyGoodsCommand(this.user, product).execute();
             }
         } else {
-            new BuyGoodsCommand(null, product).execute();
+            
+            // tao mot user public:
+            User publicUser = new User("public");
+            this.user = publicUser;
+            float balance = 0;
+            if (!this.txtAvalibility.getText().equals("")) {
+                balance = Float.parseFloat(this.txtAvalibility.getText());
+            }
+            
+            publicUser.setAccount(
+                    new BankAccount("public")
+                            .setBankBalance(balance));
+            
+            
+            new BuyGoodsCommand(publicUser, product).execute();
         }
 
     }
@@ -628,8 +643,6 @@ public class Screen extends javax.swing.JPanel implements Observer {
     }//GEN-LAST:event_btnRechargeActionPerformed
     public void updateCashAmount(int cashValue) {
         
-        System.out.println(this.cash);
-        
         String currCash = this.txtAvalibility.getText();
         this.jLabelABalance.setVisible(true);
         this.txtAvalibility.setVisible(true);
@@ -757,7 +770,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
             this.btnAddProduct.setVisible(user.isAdmin());
             this.btnViewReport.setVisible(user.isAdmin());
             showUserInfo(true);
-        } else if (subject == this.user) {
+        } else if (subject instanceof User) {
             this.user.register(this);
             this.txtUName.setText(user.getUsername());
             this.txtAvalibility.setText(Utility.toMoney(this.user.getCurrentMoney()));

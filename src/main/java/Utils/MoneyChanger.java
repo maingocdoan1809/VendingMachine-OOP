@@ -35,20 +35,22 @@ public class MoneyChanger {
             return;
         }
         if (amount == 0) {
-            all.add(current);
+            var newHashMap = new HashMap<Integer, Integer>();
+            for(var entry : current.entrySet()) {
+                newHashMap.put(entry.getKey(), entry.getValue());
+            }
+            current.clear();
+            all.add(newHashMap);
             return;
         }
         for (Integer d : this.denom.keySet()) {
-            if (current.isEmpty()) {
-                current = new HashMap<>();
-            }
-            int numCash = amount % d;
-            if (numCash != 0) {
-                amount = (int) amount / numCash;
+            if (d <= amount) {
+                int numCash = amount / d;
+                int remain = amount - numCash*d;
+                System.out.println("Amount: %d,  D: %d, Numcash: %d, remain: %d".formatted(amount,d, numCash, remain));
                 current.put(d, numCash);
+                _helper(remain, current, all);
             }
-
-            _helper(amount, current, all);
         }
 
     }
@@ -64,7 +66,10 @@ public class MoneyChanger {
     public static void main(String[] args) {
         MoneyChanger c = new MoneyChanger();
 
-        System.out.println(c.convert(2000));
+        var x = c.convert(7000);
+        for (var i : x) {
+            System.out.println(i);
+        }
     }
 
 }

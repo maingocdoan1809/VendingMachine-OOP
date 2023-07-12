@@ -97,7 +97,6 @@ public class BuyGoodsCommand extends ProductCommand {
     }
 
     private void handlePaymentWithCash() {
-
         String price = Utils.Utility.toMoney(this.product.getPrice());
         // hỏi người dùng xem họ có muốn thanh toán sản phẩm này không
         int isConfirmed = JOptionPane.showConfirmDialog(null,
@@ -107,13 +106,39 @@ public class BuyGoodsCommand extends ProductCommand {
         if (isConfirmed == ConfirmationCallback.YES) {
             // tính toán xem tài khoản có đủ tiền không
             float newAmount = Screen.getFirstCurrentInstance().getCurrentUserAmount();
-            if (newAmount < 0) {
+            System.out.println(Screen.getFirstCurrentInstance().getCurrentUserAmount());
+            if ((newAmount < 0) || (this.product.getPrice() > Float.parseFloat(Screen.getFirstCurrentInstance().getCurrentUserAmount() + ""))) {
                 // nếu không đủ thì thông báo
                 JOptionPane.showMessageDialog(null,
                         "Tài khoản của bạn hiện không đủ " + price + " vui lòng nạp thêm tiền.");
             } else {
-                // update tien trong ket.
+                BankAccount userAccount = this.user.getAccount();
+                JOptionPane.showMessageDialog(null, "Mua thành công, xin mời nhận hàng.");
+                // trừ tiền
+                
+                float currBalance = userAccount.getBankBalance();
+                try {
+                    // update lại database sau khi trừ tiền
+                    ProductRepository productRepos = new ProductRepository();
+                    HistoryRepository historyRepos = new HistoryRepository();
+                    // giảm số lượng sản phẩm
+                    productRepos.update(
+                            new Product(this.product.getId()).
+                                    setRemainNums(this.product.getRemainNums() - 1)
+                    );
+                    // save history:
+                    historyRepos.insert(new History(this.user.getUsername(),
+                            this.product.getId(), this.product.getPrice()));
 
+                    userAccount.setBankBalance(currBalance - this.product.getPrice());
+                    this.product.setRemainNums(this.product.getRemainNums() - 1);
+                    // thông báo cho screen biết người dùng đã mua hàng thành công.
+
+                    this.product.notifyObservers();
+                    this.user.notifyObservers();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Có lỗi xảy ra, xin thử lại.");
+                }
             }
 
         }
@@ -123,13 +148,16 @@ public class BuyGoodsCommand extends ProductCommand {
     public void execute() {
         var method = Screen.getFirstCurrentInstance().getPaymentMethod();
         if (method == PaymentMethod.CREDIT) {
+            System.out.println("CREDIT");
             handlePaymentWitdCreditCard();
         } else if (method == PaymentMethod.CASH) {
+            System.out.println("CASH");
             handlePaymentWithCash();
         } else {
-
-            float currentAmount = Screen.getFirstCurrentInstance().getCurrentUserAmount();
-
+            System.out.println("Other");
+            var screen = Screen.getFirstCurrentInstance();
+            float currentAmount = screen.getCurrentUserAmount();
+            screen.setPaymentMethod(PaymentMethod.CASH);
             if (currentAmount == 0) {
                 JOptionPane.showMessageDialog(null, "Xin mời đưa tiền vào máy...");
                 new ListMoney().setVisible(true);
