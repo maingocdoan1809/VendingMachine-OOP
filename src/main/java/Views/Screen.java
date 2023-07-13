@@ -4,8 +4,8 @@
  */
 package Views;
 
+import DataSource.Repository.MoneyRepository;
 import DataSource.Repository.ProductRepository;
-import Models.BankAccount;
 import Models.Command.SystemCommand.AddProductCommand;
 import Models.Command.SystemCommand.DecorateButtonCommand;
 import Models.Command.SystemCommand.RechargeCommand;
@@ -15,13 +15,17 @@ import Models.Observer.Observer;
 import Models.Observer.Subject;
 import Models.Product;
 import Models.User;
+import Utils.MoneyChanger;
+import static Utils.MoneyChanger.findCombinations;
+import Utils.PaymentMethod;
 import Utils.Utility;
 import java.awt.event.MouseAdapter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import Utils.PaymentMethod;
+
 /**
  *
  * @author Admin
@@ -29,8 +33,6 @@ import Utils.PaymentMethod;
 /**
  * Đây là giao diện chính của app này.
  */
-
-
 public class Screen extends javax.swing.JPanel implements Observer {
 
     /**
@@ -50,12 +52,15 @@ public class Screen extends javax.swing.JPanel implements Observer {
         }
         return _instance;
     }
+
     public HashMap<Integer, Integer> getUserInputCash() {
         return this.cash;
     }
+
     public PaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
+
     public void setPaymentMethod(PaymentMethod p) {
         this.paymentMethod = p;
     }
@@ -71,10 +76,17 @@ public class Screen extends javax.swing.JPanel implements Observer {
         showUserInfo(false);
         this.btnAddProduct.setVisible(false);
         this.btnViewReport.setVisible(false);
+        this.btnAddMoreProduct.setVisible(false);
+        this.btnDelMoreProduct.setVisible(false);
+        this.btnViewCashBank.setVisible(false);
 
         ProductRepository p = new ProductRepository();
 
         this.jbestsellingtxt.setText("Best selling in month: " + p.getTopSelling().getName());
+        User publicUser = new User("public");
+        this.user = publicUser;
+        this.user.setCurrentMoney(0);
+        this.user.register(this);
 
     }
 
@@ -114,9 +126,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
         buttons.put("23", this.btnSlot23);
         buttons.put("24", this.btnSlot24);
         buttons.put("25", this.btnSlot25);
-       
-        
-        
+
         ProductRepository pRespo = new ProductRepository();
 
         for (Map.Entry<String, JButton> entry : buttons.entrySet()) {
@@ -125,6 +135,57 @@ public class Screen extends javax.swing.JPanel implements Observer {
             // gán màu sắc và thêm sự kiện onclick cho nó
             populateButtonWithProduct(entry.getValue(), p);
         }
+    }
+
+    private void showModifyProductButtons(Product product) {
+
+        this.btnAddMoreProduct.setVisible(true);
+        this.btnDelMoreProduct.setVisible(true);
+
+        // remove previous events:
+        for (var i : this.btnAddMoreProduct.getActionListeners()) {
+            this.btnAddMoreProduct.removeActionListener(i);
+        }
+        for (var i : this.btnDelMoreProduct.getActionListeners()) {
+            this.btnDelMoreProduct.removeActionListener(i);
+        }
+        // register a new one:
+
+        this.btnAddMoreProduct.addActionListener((e) -> {
+            ProductRepository pRepos = new ProductRepository();
+            int currRemain = product.getRemainNums();
+            try {
+                product.setRemainNums(currRemain + 1);
+                if (pRepos.update(product)) {
+                    JOptionPane.showMessageDialog(null, "Updated");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error");
+                }
+                product.notifyObservers();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+
+        });
+        this.btnDelMoreProduct.addActionListener((e) -> {
+            ProductRepository pRepos = new ProductRepository();
+            int currRemain = product.getRemainNums();
+            try {
+                if (currRemain - 1 < 0) {
+                    JOptionPane.showMessageDialog(null, "Sản phẩm đã hết, hãy nạp thêm.");
+                    throw new Exception();
+                }
+                product.setRemainNums(currRemain - 1);
+                if (pRepos.update(product)) {
+                    JOptionPane.showMessageDialog(null, "Updated");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error");
+                }
+                product.notifyObservers();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -152,9 +213,6 @@ public class Screen extends javax.swing.JPanel implements Observer {
         }
     }
 
-    /**
-     * Tô màu cho các nút bấm, dễ phân biệt:))
-     */
     final private void populateButtonWithProduct(JButton button, Product p) {
         if (p != null) {
             button.setText(p.getName());
@@ -184,7 +242,11 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
         button.addMouseListener(new MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-    
+                if (user.isAdmin()) {
+                    // show buttons
+                    showModifyProductButtons(p);
+
+                }
                 if (p != null && p.getRemainNums() > 0) {
                     if (selectedButton != null) {
                         new DecorateButtonCommand(
@@ -205,6 +267,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
                         handleUserBuyingProductEvent(p);
                     }
                 } else {
+
                     if (user != null && user.isAdmin()) {
                         updateProduct(p);
                         populateButtonWithProduct(button, p);
@@ -220,30 +283,12 @@ public class Screen extends javax.swing.JPanel implements Observer {
 
     // Kiểm tra sự xác thực khi mua hàng.
     private void handleUserBuyingProductEvent(Product product) {
-        if (this.paymentMethod == PaymentMethod.CREDIT) {
-            // nếu không có user nào thì ta phải show form đăng nhập
-            if (this.user == null) {
-                new RechargeCommand(this).execute();
-            } else {
-                // nếu đã đăng nhập rồi thì ok
-                new BuyGoodsCommand(this.user, product).execute();
-            }
+        // nếu không có user nào thì ta phải show form đăng nhập
+        if (this.user == null) {
+            new RechargeCommand(this).execute();
         } else {
-            
-            // tao mot user public:
-            User publicUser = new User("public");
-            this.user = publicUser;
-            float balance = 0;
-            if (!this.txtAvalibility.getText().equals("")) {
-                balance = Float.parseFloat(this.txtAvalibility.getText());
-            }
-            
-            publicUser.setAccount(
-                    new BankAccount("public")
-                            .setBankBalance(balance));
-            
-            
-            new BuyGoodsCommand(publicUser, product).execute();
+            // nếu đã đăng nhập rồi thì ok
+            new BuyGoodsCommand(this.user, product).execute();
         }
 
     }
@@ -267,6 +312,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
         btnAddMore = new javax.swing.JButton();
         btnAddProduct = new javax.swing.JButton();
         btnViewReport = new javax.swing.JButton();
+        btnViewCashBank = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
@@ -276,6 +322,8 @@ public class Screen extends javax.swing.JPanel implements Observer {
         javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         txtPNum = new javax.swing.JLabel();
         txtPPrice = new javax.swing.JLabel();
+        btnDelMoreProduct = new javax.swing.JButton();
+        btnAddMoreProduct = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         btnSlot1 = new javax.swing.JButton();
         btnSlot2 = new javax.swing.JButton();
@@ -364,6 +412,14 @@ public class Screen extends javax.swing.JPanel implements Observer {
             }
         });
 
+        btnViewCashBank.setBackground(new java.awt.Color(153, 153, 255));
+        btnViewCashBank.setText("Kiểm tra kho tiền");
+        btnViewCashBank.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewCashBankActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -379,7 +435,8 @@ public class Screen extends javax.swing.JPanel implements Observer {
                     .addComponent(txtUName, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelABalance, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelAname, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtAvalibility, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtAvalibility, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnViewCashBank, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -397,11 +454,13 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addComponent(btnAddMore)
                 .addGap(7, 7, 7)
                 .addComponent(btnDone)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 143, Short.MAX_VALUE)
-                .addComponent(btnViewReport)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnAddProduct)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 102, Short.MAX_VALUE)
+                .addComponent(btnViewCashBank)
                 .addGap(18, 18, 18)
+                .addComponent(btnViewReport)
+                .addGap(18, 18, 18)
+                .addComponent(btnAddProduct)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnRecharge)
                 .addContainerGap())
         );
@@ -441,13 +500,42 @@ public class Screen extends javax.swing.JPanel implements Observer {
         txtPPrice.setForeground(new java.awt.Color(0, 51, 255));
         txtPPrice.setText("10,000");
 
+        btnDelMoreProduct.setBackground(new java.awt.Color(0, 153, 255));
+        btnDelMoreProduct.setForeground(new java.awt.Color(255, 255, 255));
+        btnDelMoreProduct.setText("-");
+        btnDelMoreProduct.setToolTipText("");
+        btnDelMoreProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDelMoreProductActionPerformed(evt);
+            }
+        });
+
+        btnAddMoreProduct.setBackground(new java.awt.Color(0, 153, 255));
+        btnAddMoreProduct.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddMoreProduct.setText("+");
+        btnAddMoreProduct.setToolTipText("");
+        btnAddMoreProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddMoreProductActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(17, 17, 17)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtPNum, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDelMoreProduct)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddMoreProduct)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -455,12 +543,8 @@ public class Screen extends javax.swing.JPanel implements Observer {
                         .addGap(63, 63, 63)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPName, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtPNum, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(txtPPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jLabel6)
                 .addContainerGap())
         );
@@ -475,10 +559,12 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtPPrice))
-                .addGap(18, 18, 18)
+                .addGap(35, 35, 35)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(txtPNum))
+                    .addComponent(txtPNum)
+                    .addComponent(btnDelMoreProduct)
+                    .addComponent(btnAddMoreProduct))
                 .addContainerGap())
             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
         );
@@ -609,12 +695,12 @@ public class Screen extends javax.swing.JPanel implements Observer {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jbestsellingtxt))
-                        .addGap(0, 1756, Short.MAX_VALUE))))
+                        .addGap(0, 292, Short.MAX_VALUE))))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(58, 58, 58)
                     .addComponent(jLabel7)
-                    .addContainerGap(1943, Short.MAX_VALUE)))
+                    .addContainerGap(481, Short.MAX_VALUE)))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -624,7 +710,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(104, 104, 104)
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
                 .addGap(42, 42, 42))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
@@ -641,26 +727,20 @@ public class Screen extends javax.swing.JPanel implements Observer {
         var chooseMethod = new ChoosePaymentMethod(this);
         chooseMethod.setVisible(true);
     }//GEN-LAST:event_btnRechargeActionPerformed
-    public void updateCashAmount(int cashValue) {
-        
-        String currCash = this.txtAvalibility.getText();
-        this.jLabelABalance.setVisible(true);
-        this.txtAvalibility.setVisible(true);
-        this.btnAddMore.setVisible(true);
-        this.btnDone.setVisible(true);
-        if (currCash.equals("")) {
-            this.txtAvalibility.setText(cashValue + "");
-        } else {
-            int currCashInt = Integer.parseInt(currCash);
-            this.txtAvalibility.setText((cashValue + currCashInt) + "");
-        }
+    public int updateCashAmount(int cashValue) {
+
+        var balance = this.user.getCurrentMoney() + cashValue;
+        this.txtAvalibility.setText(Utility.toMoney(balance));
+        return (int) balance;
     }
+
     public float getCurrentUserAmount() {
         if (this.txtAvalibility.getText().trim().equals("")) {
             return 0;
         }
         return Float.parseFloat(this.txtAvalibility.getText());
     }
+
     private void showUserInfo(boolean state) {
 
         this.txtAvalibility.setVisible(state);
@@ -669,21 +749,50 @@ public class Screen extends javax.swing.JPanel implements Observer {
         this.jLabelAname.setVisible(state);
         this.btnDone.setVisible(state);
         this.btnAddMore.setVisible(state);
+
+    }
+
+    private void backMoney(int amount) {
+        int[] arr = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000};
+        MoneyRepository mRepos = new MoneyRepository();
+        List<List<Integer>> combinations = findCombinations(mRepos.getAll(), arr, amount);
+        if (combinations.size() == 0) {
+            JOptionPane.showMessageDialog(null, "Số tiền trong máy không đủ, quý khách vui lòng liên hệ nhân viên để được hỗ trợ.");
+        } else {
+            var combination = combinations.get(0);
+            var map = MoneyChanger.toHashMapCount(combination);
+            String notif = "";
+            var denom = MoneyChanger.getDenom();
+            for (var i : map.entrySet()) {
+                mRepos.insert(Map.entry(i.getKey(), - i.getValue()));
+                notif += "\n" + denom.get(i.getKey()) + ": " + i.getValue() + " tờ.";
+            }
+            
+            
+            JOptionPane.showMessageDialog(null, """
+                                                Xin mời nhận lại tiền của bạn:
+                                                """ + notif);
+            
+        }
+
     }
 
     private void btnDoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDoneActionPerformed
 
         this.user = null;
-        showUserInfo(false);
         // turn of admin buttons:
-        this.btnAddProduct.setVisible(false);
-        this.btnViewReport.setVisible(false);
+        showUserInfo(false);
+
+        // back lai tien cho nguoi dung neu ho dang dung CASH.
+        if (this.paymentMethod == PaymentMethod.CASH) {
+            backMoney((int) user.getCurrentMoney());
+        }
+
     }//GEN-LAST:event_btnDoneActionPerformed
 
     private void btnAddMoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMoreActionPerformed
         if (this.paymentMethod == PaymentMethod.CREDIT) {
             String input = JOptionPane.showInputDialog("Nhập số tiền bạn muốn nạp thêm", 0);
-
             float userInputMoney = (float) 0.0;
             try {
                 userInputMoney = Float.parseFloat(input);
@@ -692,6 +801,10 @@ public class Screen extends javax.swing.JPanel implements Observer {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Bạn phải nhập một số, vui lòng thử lại");
             }
+        } else if (this.paymentMethod == PaymentMethod.CASH) {
+            var listMoney = new ListMoney();
+            listMoney.setVisible(true);
+            Screen.getFirstCurrentInstance().setPaymentMethod(PaymentMethod.CASH);
         } else {
             this.btnRechargeActionPerformed(null);
         }
@@ -705,10 +818,24 @@ public class Screen extends javax.swing.JPanel implements Observer {
         new ViewReportCommand().execute();
     }//GEN-LAST:event_btnViewReportActionPerformed
 
+    private void btnViewCashBankActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewCashBankActionPerformed
+        new CashBank().setVisible(true);
+    }//GEN-LAST:event_btnViewCashBankActionPerformed
+
+    private void btnDelMoreProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelMoreProductActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDelMoreProductActionPerformed
+
+    private void btnAddMoreProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMoreProductActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAddMoreProductActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddMore;
+    private javax.swing.JButton btnAddMoreProduct;
     private javax.swing.JButton btnAddProduct;
+    private javax.swing.JButton btnDelMoreProduct;
     private javax.swing.JButton btnDone;
     private javax.swing.JButton btnRecharge;
     private javax.swing.JButton btnSlot1;
@@ -736,6 +863,7 @@ public class Screen extends javax.swing.JPanel implements Observer {
     private javax.swing.JButton btnSlot7;
     private javax.swing.JButton btnSlot8;
     private javax.swing.JButton btnSlot9;
+    private javax.swing.JButton btnViewCashBank;
     private javax.swing.JButton btnViewReport;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -765,13 +893,13 @@ public class Screen extends javax.swing.JPanel implements Observer {
             User user = l.getLoggedInUser();
             this.user = user;
             this.user.register(this);
+            showUserInfo(true);
             this.txtUName.setText(user.getUsername());
             this.txtAvalibility.setText(Utility.toMoney(user.getCurrentMoney()));
             this.btnAddProduct.setVisible(user.isAdmin());
             this.btnViewReport.setVisible(user.isAdmin());
-            showUserInfo(true);
-        } else if (subject instanceof User) {
-            this.user.register(this);
+            this.btnViewCashBank.setVisible(user.isAdmin());
+        } else if (this.user == subject) {
             this.txtUName.setText(user.getUsername());
             this.txtAvalibility.setText(Utility.toMoney(this.user.getCurrentMoney()));
             showUserInfo(true);

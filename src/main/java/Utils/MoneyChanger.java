@@ -14,8 +14,16 @@ import java.util.List;
  */
 public class MoneyChanger {
 
-    private HashMap<Integer, String> denom = new HashMap<>();
+    private  HashMap<Integer, String> denom = new HashMap<>();
 
+    private static class BooleanWrapper {
+
+        public boolean bool = false;
+    }
+
+    public static HashMap<Integer, String> getDenom() {
+        return new MoneyChanger().denom;
+    }
     public MoneyChanger() {
         denom.put(1000, "Một nghìn đồng");
         denom.put(2000, "Hai nghìn đồng");
@@ -26,45 +34,55 @@ public class MoneyChanger {
         denom.put(100000, "Một trăm nghìn đồng");
         denom.put(200000, "Hai trăn nghìn đồng");
         denom.put(500000, "Năm trăm nghìn đồng");
+
     }
 
-    public static List<List<Integer>> findCombinations(int[] arr, int m) {
+    public static List<List<Integer>> findCombinations(HashMap<Integer, Integer> shouldMatch, int[] arr, int m) {
         List<List<Integer>> combinations = new ArrayList<>();
-        backtrack(combinations, new ArrayList<>(), arr, m, 0);
+        backtrack(shouldMatch, combinations, new ArrayList<>(), arr, m, 0, new BooleanWrapper());
         return combinations;
     }
 
-    private static void backtrack(List<List<Integer>> combinations, List<Integer> currentCombination,
-            int[] arr, int remainingSum, int start) {
+    public static HashMap<Integer, Integer> toHashMapCount(List<Integer> currentCombination) {
+        HashMap<Integer, Integer> x = new HashMap<>();
+        for (var i : currentCombination) {
+            if (x.get(i) == null) {
+                x.put(i, 1);
+            } else {
+                x.put(i, x.get(i) + 1);
+            }
+        }
+        return x;
+    }
+
+    private static void backtrack(HashMap<Integer, Integer> shouldMatch, List<List<Integer>> combinations, List<Integer> currentCombination,
+            int[] arr, int remainingSum, int start, BooleanWrapper isMatch) {
         if (remainingSum == 0) {
+            var x = toHashMapCount( currentCombination);
+            for (var i : x.entrySet()) {
+                Integer cashValue = i.getKey();
+                var max = shouldMatch.get(cashValue);
+                var desired = i.getValue();
+                if (max - desired < 0) {
+                    return;
+                }
+            }
+            isMatch.bool = true;
             combinations.add(new ArrayList<>(currentCombination));
             return;
         }
 
         for (int i = arr.length - 1; i >= start; i--) {
-            if (arr[i] <= remainingSum) {
+            if (arr[i] <= remainingSum && !isMatch.bool) {
                 currentCombination.add(arr[i]);
-                backtrack(combinations, currentCombination, arr, remainingSum - arr[i], i);
+                backtrack(shouldMatch, combinations, currentCombination, arr, remainingSum - arr[i], i, isMatch);
                 currentCombination.remove(currentCombination.size() - 1);
             }
         }
     }
 
     public static void main(String[] args) {
-        int[] arr = {1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000};
-        int m = 13000;
 
-        List<List<Integer>> combinations = findCombinations(arr, m);
-        // combinations.sort((a, b) -> {
-        // if (a.size() > b.size()) {
-        // return 1;
-        // }
-        // return -1;
-        // });
-        // Print the combinations
-        for (List<Integer> combination : combinations) {
-            System.out.println(combination);
-        }
     }
 
 }

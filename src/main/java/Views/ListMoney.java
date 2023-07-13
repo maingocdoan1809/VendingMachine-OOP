@@ -45,7 +45,8 @@ public class ListMoney extends javax.swing.JFrame {
                     } else {
                         cash.put(currentValue, cash.get(currentValue) + 1);
                     }
-                    screen.updateCashAmount(entry.getValue());
+                    screen.getUser().setCurrentMoney(screen.updateCashAmount(entry.getValue()));
+                    screen.getUser().notifyObservers();
                 } else {
                     JOptionPane.showMessageDialog(null, "Error");
                 }

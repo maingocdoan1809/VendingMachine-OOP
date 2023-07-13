@@ -11,12 +11,11 @@ import Models.BankAccount;
 import Models.History;
 import Models.Product;
 import Models.User;
+import Utils.PaymentMethod;
+import Views.ListMoney;
 import Views.Screen;
 import javax.security.auth.callback.ConfirmationCallback;
 import javax.swing.JOptionPane;
-import Utils.PaymentMethod;
-import Views.ChoosePaymentMethod;
-import Views.ListMoney;
 
 /**
  *
@@ -105,18 +104,15 @@ public class BuyGoodsCommand extends ProductCommand {
         // ok, mua
         if (isConfirmed == ConfirmationCallback.YES) {
             // tính toán xem tài khoản có đủ tiền không
-            float newAmount = Screen.getFirstCurrentInstance().getCurrentUserAmount();
-            System.out.println(Screen.getFirstCurrentInstance().getCurrentUserAmount());
-            if ((newAmount < 0) || (this.product.getPrice() > Float.parseFloat(Screen.getFirstCurrentInstance().getCurrentUserAmount() + ""))) {
+            float newAmount = user.getCurrentMoney() - this.product.getPrice();
+            if ((newAmount < 0) || (this.product.getPrice() > user.getCurrentMoney())) {
                 // nếu không đủ thì thông báo
                 JOptionPane.showMessageDialog(null,
                         "Tài khoản của bạn hiện không đủ " + price + " vui lòng nạp thêm tiền.");
             } else {
-                BankAccount userAccount = this.user.getAccount();
                 JOptionPane.showMessageDialog(null, "Mua thành công, xin mời nhận hàng.");
                 // trừ tiền
-                
-                float currBalance = userAccount.getBankBalance();
+                this.user.setCurrentMoney(newAmount);
                 try {
                     // update lại database sau khi trừ tiền
                     ProductRepository productRepos = new ProductRepository();
@@ -130,7 +126,6 @@ public class BuyGoodsCommand extends ProductCommand {
                     historyRepos.insert(new History(this.user.getUsername(),
                             this.product.getId(), this.product.getPrice()));
 
-                    userAccount.setBankBalance(currBalance - this.product.getPrice());
                     this.product.setRemainNums(this.product.getRemainNums() - 1);
                     // thông báo cho screen biết người dùng đã mua hàng thành công.
 
@@ -148,12 +143,11 @@ public class BuyGoodsCommand extends ProductCommand {
     public void execute() {
         var method = Screen.getFirstCurrentInstance().getPaymentMethod();
         if (method == PaymentMethod.CREDIT) {
-            System.out.println("CREDIT");
             handlePaymentWitdCreditCard();
         } else if (method == PaymentMethod.CASH) {
-            System.out.println("CASH");
             handlePaymentWithCash();
-        } else {
+        } 
+        else {
             System.out.println("Other");
             var screen = Screen.getFirstCurrentInstance();
             float currentAmount = screen.getCurrentUserAmount();

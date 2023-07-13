@@ -16,7 +16,7 @@ public class BankAccount {
     private String bankAccountUsername;
     private String bankName;
     private String bankAccountNumber;    
-    private float bankBalance;
+    private float bankBalance = 0;
     
     
     public BankAccount(String bankAccountNumber) {
